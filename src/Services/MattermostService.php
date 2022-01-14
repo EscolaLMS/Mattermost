@@ -2,17 +2,16 @@
 
 namespace EscolaLms\Mattermost\Services;
 
-use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Auth\Models\User;
+use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
+use Gnello\Mattermost\Driver;
 use Gnello\Mattermost\Laravel\Facades\Mattermost;
 use Illuminate\Support\Str;
-use Gnello\Mattermost\Driver;
-use Gnello\Mattermost\Models\TeamModel;
 use Psr\Http\Message\ResponseInterface;
+use stdClass;
 
 class MattermostService implements MattermostServiceContract
 {
-
     public Driver $driver;
 
     public function __construct()
@@ -25,7 +24,7 @@ class MattermostService implements MattermostServiceContract
         return Str::slug($user->email);
     }
 
-    private function getData(ResponseInterface $result): mixed
+    private function getData(ResponseInterface $result): stdClass
     {
         return json_decode($result->getBody());
     }
@@ -33,10 +32,10 @@ class MattermostService implements MattermostServiceContract
     private function logResponse(ResponseInterface $result): void
     {
         if ($result->getStatusCode() < 400) {
-            echo "Everything is ok.";
+            echo 'Everything is ok.';
             dd(json_decode($result->getBody()));
         } else {
-            echo "HTTP ERROR " . $result->getStatusCode();
+            echo 'HTTP ERROR '.$result->getStatusCode();
             dd(json_decode($result->getBody()));
         }
     }
@@ -44,28 +43,29 @@ class MattermostService implements MattermostServiceContract
     public function addUser(User $user): bool
     {
         $result = $this->getOrCreateUser($user);
+
         return $result->getStatusCode() < 400;
     }
 
-    public function addUserToTeam(User $user, $teamDisplayName = "Courses"): bool
+    public function addUserToTeam(User $user, $teamDisplayName = 'Courses'): bool
     {
         $team = $this->getData($this->getOrCreateTeam($teamDisplayName));
         $user = $this->getData($this->getOrCreateUser($user));
-
 
         if (isset($team->id) && isset($user->id)) {
             $teams = $this->driver->getTeamModel();
             $result = $teams->addUser($team->id, [
                 'user_id' => $user->id,
-                'team_id' => $team->id
+                'team_id' => $team->id,
             ]);
+
             return $result->getStatusCode() < 400;
         }
 
         return false;
     }
 
-    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = "Courses"): bool
+    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
     {
         $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
         $mmUser = $this->getData($this->getOrCreateUser($user));
@@ -74,8 +74,9 @@ class MattermostService implements MattermostServiceContract
             $this->addUserToTeam($user, $teamDisplayName);
             $channels = $this->driver->getChannelModel();
             $result = $channels->addUser($channel->id, [
-                'user_id' => $mmUser->id
+                'user_id' => $mmUser->id,
             ]);
+
             return $result->getStatusCode() < 400;
         }
 
@@ -87,7 +88,7 @@ class MattermostService implements MattermostServiceContract
         $name = Str::slug($displayName);
 
         $teams = $this->driver->getTeamModel();
-        $result  = $teams->getTeamByName($name);
+        $result = $teams->getTeamByName($name);
 
         if ($result->getStatusCode() < 400) {
             return $result;
@@ -98,7 +99,7 @@ class MattermostService implements MattermostServiceContract
         $result = $teams->createTeam([
             'name' => $name,
             'display_name' => $name,
-            'type' => 'I' // 'O' for open, 'I' for invite only
+            'type' => 'I', // 'O' for open, 'I' for invite only
         ]);
 
         return $result;
@@ -108,7 +109,7 @@ class MattermostService implements MattermostServiceContract
     {
         $team = $this->getData($this->getOrCreateTeam($teamDisplayName));
 
-        $channelName =  Str::slug($channelDisplayName);
+        $channelName = Str::slug($channelDisplayName);
 
         if (isset($team->id)) {
             $channels = $this->driver->getChannelModel();
@@ -122,7 +123,7 @@ class MattermostService implements MattermostServiceContract
                 'team_id' => $team->id,
                 'name' => $channelName,
                 'display_name' => $channelDisplayName,
-                'type' => 'P' // 'O' for a public channel, 'P' for a private channel
+                'type' => 'P', // 'O' for a public channel, 'P' for a private channel
             ]);
 
             return $result;
@@ -147,16 +148,15 @@ class MattermostService implements MattermostServiceContract
             'username' => $this->getUsername($user),
             'first_name' => $user->first_name,
             'last_name' => $user->last_name,
-            "auth_service" => "email",
-            "password" => Str::random(16)
+            'auth_service' => 'email',
+            'password' => Str::random(16),
         ]);
 
         return $result;
     }
 
-    public function sendMessage(string $markdown, $channelDisplayName, $teamDisplayName = "Courses"): bool
+    public function sendMessage(string $markdown, $channelDisplayName, $teamDisplayName = 'Courses'): bool
     {
-
         $channels = $this->driver->getChannelModel();
 
         $channel = $channels->getChannelByNameAndTeamName(Str::slug($teamDisplayName), Str::slug($channelDisplayName));
@@ -181,10 +181,10 @@ class MattermostService implements MattermostServiceContract
 
         $users = $this->driver->getUserModel();
 
-        $newPassword = Str::random() . rand(0, 9) . "!";
+        $newPassword = Str::random().rand(0, 9).'!';
 
         $result = $users->updateUserPassword($mmUser->id, [
-            'new_password' => $newPassword
+            'new_password' => $newPassword,
         ]);
 
         $results = json_decode($result->getBody());
@@ -192,13 +192,13 @@ class MattermostService implements MattermostServiceContract
         return [
             'status' => $results,
             'user' => $mmUser,
-            'password' => $newPassword
+            'password' => $newPassword,
         ];
     }
 
     public function getUserData(User $user): array
     {
-        $server =  config('mattermost.servers.default.host');
+        $server = config('mattermost.servers.default.host');
 
         $users = $this->driver->getUserModel();
 
@@ -219,18 +219,17 @@ class MattermostService implements MattermostServiceContract
         $channels = $this->driver->getChannelModel();
 
         foreach ($userTeamsData as $userTeamData) {
-
-            $result =  $channels->getChannelsForUser($userData->id, $userTeamData->id);
+            $result = $channels->getChannelsForUser($userData->id, $userTeamData->id);
             $channelsData = json_decode($result->getBody());
             foreach ($channelsData as $channelData) {
-                $channelData->url = 'https://' . $server . '/' . $userTeamData->name . '/' . $channelData->name;
+                $channelData->url = 'https://'.$server.'/'.$userTeamData->name.'/'.$channelData->name;
             }
             $userTeamData->channels = $channelsData;
         }
 
         return [
             'server' => $server,
-            'teams' => $userTeamsData
+            'teams' => $userTeamsData,
         ];
     }
 

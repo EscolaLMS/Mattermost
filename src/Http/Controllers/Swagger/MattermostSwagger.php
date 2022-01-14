@@ -8,80 +8,62 @@ use Illuminate\Http\Request;
 interface MattermostSwagger
 {
     /**
-     * @OA\Post(
-     *     path="/api/cmi5/fetch",
-     *     summary="cmi5 token fetch",
-     *     tags={"cmi5"},
-     *     @OA\Parameter(
-     *          name="token",
-     *          required=true,
-     *          in="query"
-     *      ),
-     *     @OA\Response(
-     *          response=200,
-     *          description="successful operation",
-     *          @OA\MediaType(
-     *              mediaType="application/json",
-     *          ),
-     *      ),
-     * )
-     */
-    public function fetch(Request $request): JsonResponse;
-
-    /**
      * @OA\Get(
-     *      path="/api/cmi5/courses/{id}",
-     *      summary="Get Course cmi5 launch params",
-     *      tags={"cmi5"},
-     *      description="Course cmi5 launch params",
+     *      path="/api/mattermost/me",
+     *      summary="List all of the available mattermost teams and channels for a user",
+     *      tags={"Mattermost"},
+     *      description="ist all of the available mattermost teams and channels for a user",
      *      security={
      *         {"passport": {}},
      *      },
-     *      @OA\Parameter(
-     *          name="id",
-     *          description="id of Course",
-     *          @OA\Schema(
-     *             type="integer",
-     *         ),
-     *          required=true,
-     *          in="path"
-     *      ),
      *      @OA\Response(
      *          response=200,
      *          description="successful operation",
      *          @OA\MediaType(
      *              mediaType="application/json"
      *          ),
-     *          @OA\Schema(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="endpoint",
-     *                  type="string"
-     *              ),
-     *              @OA\Property(
-     *                  property="fetch",
-     *                  type="string"
-     *              ),
-     *              @OA\Property(
-     *                  property="actor",
-     *                  type="object"
-     *              ),
-     *              @OA\Property(
-     *                  property="registration",
-     *                  type="string"
-     *              ),
-     *              @OA\Property(
-     *                  property="activityId",
-     *                  type="string"
-     *              ),
-     *              @OA\Property(
-     *                  property="url",
-     *                  type="string"
-     *              ),                  
-     *          )
      *      )
      * )
      */
+    public function me(Request $request): JsonResponse;
 
-    public function lunchParams(Request $request, $id): JsonResponse;
+    /**
+     * @OA\Get(
+     *      path="/api/mattermost/generate_credentials",
+     *      summary="Generates user (creates one if not exists) credentials and sets a new random password",
+     *      tags={"Mattermost"},
+     *      description="Generates user (creates one if not exists) credentials and sets a new random password",
+     *      security={
+     *         {"passport": {}},
+     *      },
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\MediaType(
+     *              mediaType="application/json"
+     *          ),
+     *      )
+     * )
+     */
+    public function generateCredentials(Request $request): JsonResponse;
+
+    /**
+     * @OA\Get(
+     *      path="/api/mattermost/generate_credentials",
+     *      summary="Sends request for mattermost to send reset password link with email",
+     *      tags={"Mattermost"},
+     *      description="Sends request for mattermost to send reset password link with email",
+     *      security={
+     *         {"passport": {}},
+     *      },
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\MediaType(
+     *              mediaType="application/json"
+     *          ),
+     *      )
+     * )
+     */
+    public function resetPassword(Request $request): JsonResponse;
 }
