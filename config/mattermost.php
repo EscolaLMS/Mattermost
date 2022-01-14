@@ -42,9 +42,9 @@ return [
 
         'default' => [
             'auth' => env('MATTERMOST_AUTH', 'default'),
-            'host' => env('MATTERMOST_HOST', 'mm-stage.escolalms.com'),
-            'login' => env('MATTERMOST_LOGIN', 'admin@escolasoft.com'),
-            'password' => env('MATTERMOST_PASSWORD', 'QbSz9A8rYAv9!'),
+            'host' => env('MATTERMOST_HOST', 'localhost'),
+            'login' => env('MATTERMOST_LOGIN', 'admin'),
+            'password' => env('MATTERMOST_PASSWORD', 'secret'),
             'guzzle' => []
         ],
 

@@ -44,7 +44,6 @@ class MattermostService implements MattermostServiceContract
     public function addUser(User $user): bool
     {
         $result = $this->getOrCreateUser($user);
-        $this->sendMessage("nowy user!!", "Town Square");
         return $result->getStatusCode() < 400;
     }
 
@@ -52,6 +51,7 @@ class MattermostService implements MattermostServiceContract
     {
         $team = $this->getData($this->getOrCreateTeam($teamDisplayName));
         $user = $this->getData($this->getOrCreateUser($user));
+
 
         if (isset($team->id) && isset($user->id)) {
             $teams = $this->driver->getTeamModel();
@@ -173,5 +173,75 @@ class MattermostService implements MattermostServiceContract
         }
 
         return false;
+    }
+
+    public function generateUserCredentials(User $user): array
+    {
+        $mmUser = json_decode($this->getOrCreateUser($user)->getBody());
+
+        $users = $this->driver->getUserModel();
+
+        $newPassword = Str::random() . rand(0, 9) . "!";
+
+        $result = $users->updateUserPassword($mmUser->id, [
+            'new_password' => $newPassword
+        ]);
+
+        $results = json_decode($result->getBody());
+
+        return [
+            'status' => $results,
+            'user' => $mmUser,
+            'password' => $newPassword
+        ];
+    }
+
+    public function getUserData(User $user): array
+    {
+        $server =  config('mattermost.servers.default.host');
+
+        $users = $this->driver->getUserModel();
+
+        $result = $users->getUserByEmail($user->email);
+
+        if ($result->getStatusCode() >= 400) {
+            return [];
+        }
+
+        $userData = json_decode($result->getBody());
+
+        $teams = $this->driver->getTeamModel();
+
+        $result = $teams->getUserTeams($userData->id);
+
+        $userTeamsData = json_decode($result->getBody());
+
+        $channels = $this->driver->getChannelModel();
+
+        foreach ($userTeamsData as $userTeamData) {
+
+            $result =  $channels->getChannelsForUser($userData->id, $userTeamData->id);
+            $channelsData = json_decode($result->getBody());
+            foreach ($channelsData as $channelData) {
+                $channelData->url = 'https://' . $server . '/' . $userTeamData->name . '/' . $channelData->name;
+            }
+            $userTeamData->channels = $channelsData;
+        }
+
+        return [
+            'server' => $server,
+            'teams' => $userTeamsData
+        ];
+    }
+
+    public function sendUserResetPassword($user): bool
+    {
+        $this->getOrCreateUser($user);
+
+        $users = $this->driver->getUserModel();
+
+        $users->sendPasswordResetEmail(['email' => $user->email]);
+
+        return true;
     }
 }

@@ -1,23 +1,35 @@
 <?php
 
-namespace EscolaLms\Lrs\Tests;
+namespace EscolaLms\Mattermost\Tests;
 
 
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
-use EscolaLms\Lrs\EscolaLmsLrsServiceProvider;
+use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
+use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
+
 use EscolaLms\Lrs\Database\Seeders\LrsSeeder;
 use Laravel\Passport\Passport;
 use EscolaLms\Lrs\Tests\Models\Client;
-use EscolaLms\Lrs\Tests\Models\User;
+use EscolaLms\Auth\Models\User;
 
+use EscolaLms\Core\Tests\TestCase as CoreTestCase;
+use Gnello\Mattermost\Laravel\MattermostServiceProvider;
+// use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
 
-class TestCase extends \EscolaLms\Core\Tests\TestCase
+class TestCase extends CoreTestCase
 {
     use DatabaseTransactions;
+
+    protected MockHandler $mock;
 
     protected function setUp(): void
     {
@@ -30,8 +42,9 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
 
         return [
             ...parent::getPackageProviders($app),
-            EscolaLmsLrsServiceProvider::class,
-            EscolaLmsCourseServiceProvider::class,
+            EscolaLmsMattermostServiceProvider::class,
+            EscolaLmsSettingsServiceProvider::class,
+            MattermostServiceProvider::class,
             PassportServiceProvider::class,
             PermissionServiceProvider::class,
         ];
@@ -41,5 +54,11 @@ class TestCase extends \EscolaLms\Core\Tests\TestCase
     {
         $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('passport.client_uuids', true);
+
+        $this->mock = new MockHandler([new Response(200, ['Token' => 'Token'], 'Hello, World'),]);
+
+        $handlerStack = HandlerStack::create($this->mock);
+
+        $app['config']->set('mattermost.servers.default.guzzle', ['handler' => $handlerStack]);
     }
 }
