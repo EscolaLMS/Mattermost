@@ -8,7 +8,6 @@ use Gnello\Mattermost\Driver;
 use Gnello\Mattermost\Laravel\Facades\Mattermost;
 use Illuminate\Support\Str;
 use Psr\Http\Message\ResponseInterface;
-use stdClass;
 
 class MattermostService implements MattermostServiceContract
 {
@@ -24,7 +23,7 @@ class MattermostService implements MattermostServiceContract
         return Str::slug($user->email);
     }
 
-    private function getData(ResponseInterface $result): stdClass
+    private function getData(ResponseInterface $result)
     {
         return json_decode($result->getBody());
     }
