@@ -40,11 +40,6 @@ jobs:
       - name: Update composer
         run: composer update
 
-      - name: create folder for passport keys
-        run: |
-          mkdir storage
-          mkdir src/../../storage/
-
       - name: Clear config
         run: vendor/bin/testbench config:clear
 
@@ -55,9 +50,6 @@ jobs:
         run: |
           vendor/bin/testbench passport:keys --force
           vendor/bin/testbench passport:client --personal --no-interaction
-
-      - name: copy keys
-        run: cp src/../../storage/*.key vendor/orchestra/testbench-core/laravel/storage/
 
       - name: Run tests
         run: vendor/bin/phpunit
@@ -89,11 +81,6 @@ jobs:
       - name: Update composer
         run: composer update
 
-      - name: create folder for passport keys
-        run: |
-          mkdir storage
-          mkdir src/../../storage/
-
       - name: Clear config
         run: vendor/bin/testbench config:clear
 
@@ -104,9 +91,6 @@ jobs:
         run: |
           vendor/bin/testbench passport:keys --force
           vendor/bin/testbench passport:client --personal --no-interaction
-
-      - name: copy keys
-        run: cp src/../../storage/*.key vendor/orchestra/testbench-core/laravel/storage/
 
       - name: Run tests
         run: vendor/bin/phpunit
@@ -134,11 +118,6 @@ jobs:
       - name: Update composer
         run: composer update
 
-      - name: create folder for passport keys
-        run: |
-          mkdir storage
-          mkdir src/../../storage/
-
       - name: Setup environment
         run: cp env/postgres/* .
 
@@ -152,9 +131,6 @@ jobs:
         run: |
           vendor/bin/testbench passport:keys --force
           vendor/bin/testbench passport:client --personal --no-interaction
-
-      - name: copy keys
-        run: cp src/../../storage/*.key vendor/orchestra/testbench-core/laravel/storage/
 
       - name: Run tests
         run: vendor/bin/phpunit
