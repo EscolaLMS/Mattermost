@@ -8,7 +8,8 @@ env:
   - APP_DEBUG=true
 
 providers:
-  - Spatie\Permission\PermissionServiceProvider;
-  - EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
-  - EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
-  - Gnello\Mattermost\Laravel\MattermostServiceProvider;
+  - Laravel\Passport\PassportServiceProvider
+  - Spatie\Permission\PermissionServiceProvider
+  - EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider
+  - EscolaLms\Settings\EscolaLmsSettingsServiceProvider
+  - Gnello\Mattermost\Laravel\MattermostServiceProvider
