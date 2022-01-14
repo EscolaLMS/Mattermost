@@ -7,7 +7,6 @@ env:
   - DB_PASSWORD=postgres
 
 providers:
-  - Laravel\Passport\PassportServiceProvider;
   - Spatie\Permission\PermissionServiceProvider;
   - EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
   - EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
