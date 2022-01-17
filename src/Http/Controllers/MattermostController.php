@@ -2,16 +2,15 @@
 
 namespace EscolaLms\Mattermost\Http\Controllers;
 
+use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Mattermost\Http\Controllers\Swagger\MattermostSwagger;
+use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
-use EscolaLms\Mattermost\Http\Controllers\Swagger\MattermostSwagger;
-use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
 use Illuminate\Support\Facades\Auth;
 
-class MattermostController extends EscolaLmsBaseController /* implements LrsSwagger */
+class MattermostController extends EscolaLmsBaseController implements MattermostSwagger
 {
-
     private MattermostServiceContract $service;
 
     public function __construct(MattermostServiceContract $service)
