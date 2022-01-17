@@ -8,8 +8,8 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Passport\PassportServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
-use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
+use Gnello\Mattermost\Laravel\MattermostServiceProvider;
 
 use EscolaLms\Lrs\Database\Seeders\LrsSeeder;
 use Laravel\Passport\Passport;
@@ -17,7 +17,6 @@ use EscolaLms\Lrs\Tests\Models\Client;
 use EscolaLms\Auth\Models\User;
 
 use EscolaLms\Core\Tests\TestCase as CoreTestCase;
-use Gnello\Mattermost\Laravel\MattermostServiceProvider;
 // use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -44,9 +43,7 @@ class TestCase extends CoreTestCase
             ...parent::getPackageProviders($app),
             EscolaLmsMattermostServiceProvider::class,
             EscolaLmsSettingsServiceProvider::class,
-            MattermostServiceProvider::class,
-            PassportServiceProvider::class,
-            PermissionServiceProvider::class,
+            MattermostServiceProvider::class
         ];
     }
 
