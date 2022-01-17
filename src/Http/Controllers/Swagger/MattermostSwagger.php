@@ -49,7 +49,7 @@ interface MattermostSwagger
 
     /**
      * @OA\Get(
-     *      path="/api/mattermost/generate_credentials",
+     *      path="/api/mattermost/reset_password",
      *      summary="Sends request for mattermost to send reset password link with email",
      *      tags={"Mattermost"},
      *      description="Sends request for mattermost to send reset password link with email",
