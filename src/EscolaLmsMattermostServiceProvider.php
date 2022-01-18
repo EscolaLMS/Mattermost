@@ -2,12 +2,12 @@
 
 namespace EscolaLms\Mattermost;
 
+use EscolaLms\Mattermost\Providers\SettingsServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Services\MattermostService;
 use EscolaLms\Auth\Events\EscolaLmsAccountConfirmedTemplateEvent;
 use Illuminate\Support\Facades\Event;
-use EscolaLms\Settings\Facades\AdministrableConfig;
 use EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent;
 
 /**
@@ -16,9 +16,6 @@ use EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent;
 
 class EscolaLmsMattermostServiceProvider extends ServiceProvider
 {
-
-    const CONFIG_KEY = 'mattermost';
-
     public $singletons = [
         MattermostServiceContract::class => MattermostService::class,
     ];
@@ -31,12 +28,7 @@ class EscolaLmsMattermostServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
-
-        AdministrableConfig::registerConfig(self::CONFIG_KEY . '.servers.default.host', ['required', 'string'], true);
-        AdministrableConfig::registerConfig(self::CONFIG_KEY . '.servers.default.login', ['required', 'string'], false);
-        AdministrableConfig::registerConfig(self::CONFIG_KEY . '.servers.default.password', ['required', 'string'], false);
     }
-
 
     public function register()
     {
@@ -44,6 +36,8 @@ class EscolaLmsMattermostServiceProvider extends ServiceProvider
             __DIR__ . '/../config/mattermost.php',
             'mattermost'
         );
+
+        $this->app->register(SettingsServiceProvider::class);
 
         Event::listen(EscolaLmsAccountConfirmedTemplateEvent::class, function ($event) {
             /**
