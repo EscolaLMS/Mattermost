@@ -151,8 +151,8 @@ class SettingsTest extends TestCase
         }
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set('escola_settings.use_database', true);
         AdministrableConfig::storeConfig();
-
         $this->refreshApplication();
 
         $student1 = $this->makeStudent([
@@ -163,13 +163,14 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUser')->never();
         });
 
-        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/users/' . $student1->getKey(), [
+        $this->response = $this->actingAs($this->user, 'api')->put('/api/admin/users/' . $student1->getKey(), [
             'first_name' => $student1->first_name,
             'last_name' => $student1->last_name,
             'email_verified' => true,
         ])->assertOk();
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set('escola_settings.use_database', true);
         AdministrableConfig::storeConfig();
         $this->refreshApplication();
 
@@ -181,7 +182,7 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUser')->once()->andReturn(true);
         });
 
-        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/users/' . $student2->getKey(), [
+        $this->response = $this->actingAs($this->user, 'api')->put('/api/admin/users/' . $student2->getKey(), [
             'first_name' => $student2->first_name,
             'last_name' => $student2->last_name,
             'email_verified' => true,
@@ -205,6 +206,7 @@ class SettingsTest extends TestCase
         ]);
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set('escola_settings.use_database', true);
         AdministrableConfig::storeConfig();
         $this->refreshApplication();
 
@@ -219,6 +221,7 @@ class SettingsTest extends TestCase
         ])->assertOk();
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set('escola_settings.use_database', true);
         AdministrableConfig::storeConfig();
         $this->refreshApplication();
 
