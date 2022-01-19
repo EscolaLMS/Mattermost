@@ -145,8 +145,6 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Auth package not installed');
         }
 
-        $admin = $this->makeAdmin();
-
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
 
         $student1 = $this->makeStudent([
@@ -157,7 +155,7 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUser')->once()->andReturn(true);
         });
 
-        $this->response = $this->actingAs($admin, 'api')->json('PUT', '/api/admin/users/' . $student1->getKey(), [
+        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/users/' . $student1->getKey(), [
             'first_name' => $student1->first_name,
             'last_name' => $student1->last_name,
             'email_verified' => true,
@@ -173,7 +171,7 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUser')->never();
         });
 
-        $this->response = $this->actingAs($admin, 'api')->json('PUT', '/api/admin/users/' . $student2->getKey(), [
+        $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/users/' . $student2->getKey(), [
             'first_name' => $student2->first_name,
             'last_name' => $student2->last_name,
             'email_verified' => true,
@@ -190,9 +188,8 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Scorm package not installed');
         }
 
-        $admin = $this->makeAdmin();
         $course = Course::factory()->create([
-            'author_id' => $admin->getKey(),
+            'author_id' => $this->user->getKey(),
             'base_price' => 997,
             'active' => true,
         ]);
