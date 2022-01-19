@@ -10,14 +10,14 @@ use EscolaLms\Mattermost\Providers\SettingsServiceProvider;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
 use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use EscolaLms\Settings\Facades\AdministrableConfig;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
 
 class SettingsTest extends TestCase
 {
-    use CreatesUsers, ApiTestTrait, WithoutMiddleware, DatabaseTransactions;
+    use CreatesUsers, ApiTestTrait, WithoutMiddleware;
 
     protected function setUp(): void
     {
@@ -26,11 +26,8 @@ class SettingsTest extends TestCase
         if (!class_exists(\EscolaLms\Settings\EscolaLmsSettingsServiceProvider::class)) {
             $this->markTestSkipped('Settings package not installed');
         }
-
         $this->seed(PermissionTableSeeder::class);
-
         Config::set('escola_settings.use_database', true);
-
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole('admin');
@@ -52,7 +49,7 @@ class SettingsTest extends TestCase
                     ],
                     [
                         'key' => "{$configKey}.servers.default.host",
-                        'value' => 'mm-server.pl',
+                        'value' => 'localhost',
                     ],
                     [
                         'key' => "{$configKey}.servers.default.login",
@@ -75,6 +72,8 @@ class SettingsTest extends TestCase
         $this->response->assertJsonFragment([
             $configKey => [
                 'package_status' => [
+                    'full_key' => "$configKey.package_status",
+                    'key' => 'package_status',
                     'rules' => [
                         'required',
                         'string',
@@ -87,15 +86,19 @@ class SettingsTest extends TestCase
                 'servers' => [
                     'default' => [
                         'host' => [
+                            'full_key' => "$configKey.servers.default.host",
+                            'key' => 'servers.default.host',
                             'rules' => [
                                 'required',
                                 'string'
                             ],
                             'public' => true,
-                            'value' => 'mm-server.pl',
+                            'value' => 'localhost',
                             'readonly' => false,
                         ],
                         'login' => [
+                            'full_key' => "$configKey.servers.default.login",
+                            'key' => 'servers.default.login',
                             'rules' => [
                                 'required',
                                 'string'
@@ -105,6 +108,8 @@ class SettingsTest extends TestCase
                             'readonly' => false,
                         ],
                         'password' => [
+                            'full_key' => "$configKey.servers.default.password",
+                            'key' => 'servers.default.password',
                             'rules' => [
                                 'required',
                                 'string'
@@ -126,7 +131,7 @@ class SettingsTest extends TestCase
             $configKey => [
                 'servers' => [
                     'default' => [
-                        'host' => 'mm-server.pl',
+                        'host' => 'localhost',
                     ],
                 ],
             ]
@@ -145,14 +150,17 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Auth package not installed');
         }
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        AdministrableConfig::storeConfig();
+
+        $this->refreshApplication();
 
         $student1 = $this->makeStudent([
             'email_verified_at' => null
         ]);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addUser')->once()->andReturn(true);
+            $mock->shouldReceive('addUser')->never();
         });
 
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/users/' . $student1->getKey(), [
@@ -161,14 +169,16 @@ class SettingsTest extends TestCase
             'email_verified' => true,
         ])->assertOk();
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
 
         $student2 = $this->makeStudent([
             'email_verified_at' => null
         ]);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addUser')->never();
+            $mock->shouldReceive('addUser')->once()->andReturn(true);
         });
 
         $this->response = $this->actingAs($this->user, 'api')->json('PUT', '/api/admin/users/' . $student2->getKey(), [
@@ -194,24 +204,28 @@ class SettingsTest extends TestCase
             'active' => true,
         ]);
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
 
         $student1 = $this->makeStudent();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
+            $mock->shouldReceive('addUserToChannel')->never();
         });
 
         $this->response = $this->actingAs($this->user, 'api')->post('/api/admin/courses/' . $course->getKey() . '/access/add/', [
             'users' => [$student1->getKey()]
         ])->assertOk();
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
 
         $student2 = $this->makeStudent();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addUserToChannel')->never();
+            $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
         });
 
         $this->response = $this->actingAs($this->user, 'api')->post('/api/admin/courses/' . $course->getKey() . '/access/add/', [

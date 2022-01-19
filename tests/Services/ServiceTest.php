@@ -2,19 +2,10 @@
 
 namespace EscolaLms\Mattermost\Tests\Services;
 
-use BadMethodCallException;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Mattermost\Tests\TestCase;
-use Exception;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\RequestException;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
-use EscolaLms\Mattermost\Services\MattermostService;
 
 class ServiceTest extends TestCase
 {

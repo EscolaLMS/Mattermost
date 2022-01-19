@@ -12,26 +12,26 @@ use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function boot()
     {
+        if (Config::get(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED) !== PackageStatusEnum::ENABLED) {
+            return;
+        }
+
         Event::listen(EscolaLmsAccountConfirmedTemplateEvent::class, function ($event) {
             /**
              * >>> event(new EscolaLms\Auth\Events\EscolaLmsAccountConfirmedTemplateEvent(App\Models\User::find(2)));
              */
-            if (Config::get(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED) === PackageStatusEnum::ENABLED) {
-                app(MattermostServiceContract::class)->addUser($event->user);
-            }
+            app(MattermostServiceContract::class)->addUser($event->user);
         });
 
         Event::listen(EscolaLmsCourseAssignedTemplateEvent::class, function ($event) {
             /**
              * >>> event(new EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent(App\Models\User::find(3), EscolaLms\Courses\Models\Course::find(1)));
              */
-            if (Config::get(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED) === PackageStatusEnum::ENABLED) {
-                $user = $event->getUser();
-                $course = $event->getCourse();
-                app(MattermostServiceContract::class)->addUserToChannel($user, $course->title);
-            }
+            $user = $event->getUser();
+            $course = $event->getCourse();
+            app(MattermostServiceContract::class)->addUserToChannel($user, $course->title);
         });
     }
 }

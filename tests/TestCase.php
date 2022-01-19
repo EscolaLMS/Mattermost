@@ -5,7 +5,7 @@ namespace EscolaLms\Mattermost\Tests;
 use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use GuzzleHttp\Middleware;
 use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
 use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
 use Gnello\Mattermost\Laravel\MattermostServiceProvider;
@@ -19,9 +19,9 @@ use GuzzleHttp\Psr7\Response;
 
 class TestCase extends CoreTestCase
 {
-    use DatabaseTransactions;
-
     protected MockHandler $mock;
+    protected $history;
+    protected $container = [];
 
     protected function setUp(): void
     {
@@ -34,11 +34,11 @@ class TestCase extends CoreTestCase
         return [
             ...parent::getPackageProviders($app),
             EscolaLmsMattermostServiceProvider::class,
-            EscolaLmsSettingsServiceProvider::class,
             MattermostServiceProvider::class,
             EscolaLmsAuthServiceProvider::class,
             EscolaLmsCourseServiceProvider::class,
             EscolaLmsScormServiceProvider::class,
+            EscolaLmsSettingsServiceProvider::class,
         ];
     }
 
@@ -48,8 +48,9 @@ class TestCase extends CoreTestCase
         $app['config']->set('passport.client_uuids', true);
 
         $this->mock = new MockHandler([new Response(200, ['Token' => 'Token'], 'Hello, World'),]);
-
+        $this->history = Middleware::history($this->container);
         $handlerStack = HandlerStack::create($this->mock);
+        $handlerStack->push($this->history);
 
         $app['config']->set('mattermost.servers.default.guzzle', ['handler' => $handlerStack]);
     }
