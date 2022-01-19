@@ -2,8 +2,6 @@
 
 namespace EscolaLms\Mattermost\Tests;
 
-
-
 use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
