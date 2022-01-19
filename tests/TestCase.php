@@ -6,6 +6,7 @@ namespace EscolaLms\Mattermost\Tests;
 
 use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
+use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
 use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
@@ -39,6 +40,7 @@ class TestCase extends CoreTestCase
             MattermostServiceProvider::class,
             EscolaLmsAuthServiceProvider::class,
             EscolaLmsCourseServiceProvider::class,
+            EscolaLmsScormServiceProvider::class,
         ];
     }
 

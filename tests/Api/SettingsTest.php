@@ -24,7 +24,15 @@ class SettingsTest extends TestCase
         parent::setUp();
 
         if (!class_exists(\EscolaLms\Settings\EscolaLmsSettingsServiceProvider::class)) {
-            $this->markTestSkipped();
+            $this->markTestSkipped('Settings package not installed');
+        }
+
+        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
+            $this->markTestSkipped('Courses package not installed');
+        }
+
+        if (!class_exists(\EscolaLms\Scorm\EscolaLmsScormServiceProvider::class)) {
+            $this->markTestSkipped('Scorm package not installed');
         }
 
         $this->seed(PermissionTableSeeder::class);

@@ -2,10 +2,8 @@
 
 namespace EscolaLms\Mattermost\Services\Contracts;
 
-use EscolaLms\Auth\Models\User;
+use EscolaLms\Core\Models\User;
 use Psr\Http\Message\ResponseInterface;
-use Illuminate\Support\Facades\Auth;
-
 
 interface MattermostServiceContract
 {
