@@ -12,3 +12,5 @@ providers:
   - EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider
   - EscolaLms\Settings\EscolaLmsSettingsServiceProvider
   - Gnello\Mattermost\Laravel\MattermostServiceProvider
+  - EscolaLms\Auth\EscolaLmsAuthServiceProvider
+  - EscolaLms\Courses\EscolaLmsCourseServiceProvider

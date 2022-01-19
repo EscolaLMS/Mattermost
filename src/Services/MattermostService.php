@@ -2,7 +2,7 @@
 
 namespace EscolaLms\Mattermost\Services;
 
-use EscolaLms\Auth\Models\User;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Gnello\Mattermost\Driver;
 use Gnello\Mattermost\Laravel\Facades\Mattermost;

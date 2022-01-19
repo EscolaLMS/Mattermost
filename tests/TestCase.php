@@ -4,25 +4,19 @@ namespace EscolaLms\Mattermost\Tests;
 
 
 
+use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
+use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Laravel\Passport\PassportServiceProvider;
-use Spatie\Permission\PermissionServiceProvider;
 use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
 use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
 use Gnello\Mattermost\Laravel\MattermostServiceProvider;
-
-use EscolaLms\Lrs\Database\Seeders\LrsSeeder;
 use Laravel\Passport\Passport;
 use EscolaLms\Lrs\Tests\Models\Client;
 use EscolaLms\Auth\Models\User;
-
 use EscolaLms\Core\Tests\TestCase as CoreTestCase;
-// use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\RequestException;
 
 class TestCase extends CoreTestCase
 {
@@ -38,12 +32,13 @@ class TestCase extends CoreTestCase
 
     protected function getPackageProviders($app): array
     {
-
         return [
             ...parent::getPackageProviders($app),
             EscolaLmsMattermostServiceProvider::class,
             EscolaLmsSettingsServiceProvider::class,
-            MattermostServiceProvider::class
+            MattermostServiceProvider::class,
+            EscolaLmsAuthServiceProvider::class,
+            EscolaLmsCourseServiceProvider::class,
         ];
     }
 

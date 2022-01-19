@@ -2,13 +2,11 @@
 
 namespace EscolaLms\Mattermost;
 
+use EscolaLms\Mattermost\Providers\EventServiceProvider;
 use EscolaLms\Mattermost\Providers\SettingsServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Services\MattermostService;
-use EscolaLms\Auth\Events\EscolaLmsAccountConfirmedTemplateEvent;
-use Illuminate\Support\Facades\Event;
-use EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent;
 
 /**
  * SWAGGER_VERSION
@@ -38,21 +36,6 @@ class EscolaLmsMattermostServiceProvider extends ServiceProvider
         );
 
         $this->app->register(SettingsServiceProvider::class);
-
-        Event::listen(EscolaLmsAccountConfirmedTemplateEvent::class, function ($event) {
-            /**
-             * >>> event(new EscolaLms\Auth\Events\EscolaLmsAccountConfirmedTemplateEvent(App\Models\User::find(2)));
-             */
-            app(MattermostServiceContract::class)->addUser($event->user);
-        });
-
-        Event::listen(EscolaLmsCourseAssignedTemplateEvent::class, function ($event) {
-            /**
-             * >>> event(new EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent(App\Models\User::find(3), EscolaLms\Courses\Models\Course::find(1)));
-             */
-            $user = $event->getUser();
-            $course = $event->getCourse();
-            app(MattermostServiceContract::class)->addUserToChannel($user, $course->title);
-        });
+        $this->app->register(EventServiceProvider::class);
     }
 }
