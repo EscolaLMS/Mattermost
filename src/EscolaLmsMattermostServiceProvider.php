@@ -35,7 +35,8 @@ class EscolaLmsMattermostServiceProvider extends ServiceProvider
             'mattermost'
         );
 
-        $this->app->register(SettingsServiceProvider::class);
-        $this->app->register(EventServiceProvider::class);
+        $this->app->register(SettingsServiceProvider::class)->booted(function () {
+            $this->app->register(EventServiceProvider::class);
+        });
     }
 }
