@@ -27,14 +27,6 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Settings package not installed');
         }
 
-        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
-            $this->markTestSkipped('Courses package not installed');
-        }
-
-        if (!class_exists(\EscolaLms\Scorm\EscolaLmsScormServiceProvider::class)) {
-            $this->markTestSkipped('Scorm package not installed');
-        }
-
         $this->seed(PermissionTableSeeder::class);
 
         Config::set('escola_settings.use_database', true);
@@ -149,6 +141,10 @@ class SettingsTest extends TestCase
 
     public function testAccountConfirmedTemplateEventListenerWithPackageStatusSetting(): void
     {
+        if (!class_exists(\EscolaLms\Auth\EscolaLmsAuthServiceProvider::class)) {
+            $this->markTestSkipped('Auth package not installed');
+        }
+
         $admin = $this->makeAdmin();
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
@@ -186,6 +182,14 @@ class SettingsTest extends TestCase
 
     public function testCourseAssignedTemplateEventListenerWithPackageStatusSetting(): void
     {
+        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
+            $this->markTestSkipped('Courses package not installed');
+        }
+
+        if (!class_exists(\EscolaLms\Scorm\EscolaLmsScormServiceProvider::class)) {
+            $this->markTestSkipped('Scorm package not installed');
+        }
+
         $admin = $this->makeAdmin();
         $course = Course::factory()->create([
             'author_id' => $admin->getKey(),
