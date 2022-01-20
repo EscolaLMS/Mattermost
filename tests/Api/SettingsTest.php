@@ -2,6 +2,7 @@
 
 namespace EscolaLms\Mattermost\Tests\API;
 
+use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Core\Tests\ApiTestTrait;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Courses\Models\Course;
@@ -27,6 +28,7 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Settings package not installed');
         }
         $this->seed(PermissionTableSeeder::class);
+        $this->seed(AuthPermissionSeeder::class);
         Config::set('escola_settings.use_database', true);
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
@@ -163,9 +165,7 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUser')->never();
         });
 
-        $this->response = $this->actingAs($this->user, 'api')->put('/api/admin/users/' . $student1->getKey(), [
-            'first_name' => $student1->first_name,
-            'last_name' => $student1->last_name,
+        $this->response = $this->actingAs($this->user, 'api')->patchJson('/api/admin/users/' . $student1->getKey(), [
             'email_verified' => true,
         ])->assertOk();
 
@@ -182,9 +182,7 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUser')->once()->andReturn(true);
         });
 
-        $this->response = $this->actingAs($this->user, 'api')->put('/api/admin/users/' . $student2->getKey(), [
-            'first_name' => $student2->first_name,
-            'last_name' => $student2->last_name,
+        $this->response = $this->actingAs($this->user, 'api')->patchJson('/api/admin/users/' . $student2->getKey(), [
             'email_verified' => true,
         ])->assertOk();
     }
