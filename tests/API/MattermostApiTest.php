@@ -19,8 +19,7 @@ use EscolaLms\Core\Enums\UserRole;
 
 class MattermostApiTest extends TestCase
 {
-
-    use CreatesUsers;
+    use CreatesUsers, DatabaseTransactions;
 
     private MattermostServiceContract $service;
     private $user;
