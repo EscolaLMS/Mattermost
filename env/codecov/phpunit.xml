@@ -11,6 +11,7 @@
     <env name="DB_DATABASE" value="database" />
     <env name="DB_USERNAME" value="username" />
     <env name="DB_PASSWORD" value="password" />
+    <env name="CONFIG_USE_DATABASE" value="true"/>
   </php>
   <coverage cacheDirectory=".phpunit.cache/code-coverage" processUncoveredFiles="true">
     <include>

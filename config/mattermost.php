@@ -14,6 +14,8 @@
  * @link https://api.mattermost.com/
  */
 
+use EscolaLms\Mattermost\Enum\PackageStatusEnum;
+
 return [
 
     /*
@@ -57,4 +59,5 @@ return [
 
     ],
 
+    'package_status' => PackageStatusEnum::ENABLED,
 ];
