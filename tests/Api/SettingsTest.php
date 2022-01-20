@@ -36,6 +36,11 @@ class SettingsTest extends TestCase
         $this->mock->reset();
     }
 
+    protected function tearDown(): void
+    {
+        \EscolaLms\Settings\Models\Config::truncate();
+    }
+
     public function testAdministrableConfigApi(): void
     {
         $configKey = SettingsServiceProvider::CONFIG_KEY;

@@ -6,11 +6,11 @@ use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Mattermost\Tests\TestCase;
 use GuzzleHttp\Psr7\Response;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ServiceTest extends TestCase
 {
-
-    use CreatesUsers;
+    use CreatesUsers, DatabaseTransactions;
 
     private MattermostServiceContract $service;
     private $user;
