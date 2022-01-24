@@ -5,6 +5,7 @@ namespace EscolaLms\Mattermost\Tests\API;
 use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
 use EscolaLms\Core\Tests\ApiTestTrait;
 use EscolaLms\Core\Tests\CreatesUsers;
+use EscolaLms\Courses\Enum\CourseStatusEnum;
 use EscolaLms\Courses\Models\Course;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Providers\SettingsServiceProvider;
@@ -205,7 +206,7 @@ class SettingsTest extends TestCase
         $course = Course::factory()->create([
             'author_id' => $this->user->getKey(),
             'base_price' => 997,
-            'active' => true,
+            'status' => CourseStatusEnum::PUBLISHED,
         ]);
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
