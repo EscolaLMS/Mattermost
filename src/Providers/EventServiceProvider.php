@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Providers;
 
 use EscolaLms\Auth\Events\EscolaLmsAccountConfirmedTemplateEvent;
+use EscolaLms\Auth\Events\EscolaLmsAccountDeletedTemplateEvent;
 use EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
@@ -32,6 +33,20 @@ class EventServiceProvider extends ServiceProvider
             $user = $event->getUser();
             $course = $event->getCourse();
             app(MattermostServiceContract::class)->addUserToChannel($user, $course->title);
+        });
+
+        Event::listen(EscolaLmsAccountBlockedTemplateEvent::class, function ($event) {
+            /**
+             * >>> event(new EscolaLms\Auth\Events\EscolaLmsAccountBlockedTemplateEvent(App\Models\User::find(10)));
+             */
+            app(MattermostServiceContract::class)->blockUser($event->getUser());
+        });
+
+        Event::listen(EscolaLmsAccountDeletedTemplateEvent::class, function ($event) {
+            /**
+             * >>> event(new EscolaLms\Auth\Events\EscolaLmsAccountDeletedTemplateEvent(App\Models\User::find(10)));
+             */
+            app(MattermostServiceContract::class)->deleteUser($event->getUser());
         });
     }
 }

@@ -242,4 +242,30 @@ class MattermostService implements MattermostServiceContract
 
         return true;
     }
+
+    public function blockUser(User $user): bool
+    {
+        $userModel = $this->driver->getUserModel();
+        $result = $userModel->getUserByEmail($user->email);
+
+        if ($result->getStatusCode() === 200) {
+            $user = $this->getData($result);
+            $result = $userModel->updateUserActive($user->id, ['active' => false]);
+        }
+
+        return $result->getStatusCode() === 200;
+    }
+
+    public function deleteUser(User $user): bool
+    {
+        $userModel = $this->driver->getUserModel();
+        $result = $userModel->getUserByEmail($user->email);
+
+        if ($result->getStatusCode() === 200) {
+            $user = $this->getData($result);
+            $result = $userModel->deactivateUserAccount($user->id);
+        }
+
+        return $result->getStatusCode() === 200;
+    }
 }

@@ -97,4 +97,24 @@ class ServiceTest extends TestCase
         $this->assertEquals((array) $response['user'], $object);
         $this->assertNotNull($response['password']);
     }
+
+    public function testBlockUser()
+    {
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
+        $this->assertTrue($this->service->blockUser($this->user));
+
+        $this->mock->append(new Response(404, ['Token' => 'Token']));
+        $this->assertFalse($this->service->blockUser($this->user));
+    }
+
+    public function testDeleteUser()
+    {
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
+        $this->assertTrue($this->service->deleteUser($this->user));
+
+        $this->mock->append(new Response(404, ['Token' => 'Token']));
+        $this->assertFalse($this->service->blockUser($this->user));
+    }
 }

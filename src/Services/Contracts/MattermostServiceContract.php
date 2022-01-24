@@ -26,4 +26,8 @@ interface MattermostServiceContract
     public function generateUserCredentials(User $user): array;
 
     public function sendUserResetPassword($user): bool;
+
+    public function blockUser(User $user): bool;
+
+    public function deleteUser(User $user): bool;
 }
