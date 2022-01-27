@@ -275,6 +275,7 @@ class SettingsTest extends TestCase
     public function testRemoveTutorFromChannelWhenPackageIsDisabledAndEnabled(): void
     {
         $course = Course::factory()->create();
+        $course->authors()->sync($this->makeInstructor()->getKey());;
         $editedCourse = $course->toArray();
         $editedCourse['authors'] = [];
 
@@ -284,6 +285,7 @@ class SettingsTest extends TestCase
         $this->refreshApplication();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->never();
             $mock->shouldReceive('removeUserFromChannel')->never();
         });
 
@@ -298,6 +300,7 @@ class SettingsTest extends TestCase
         $this->refreshApplication();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->andReturn(true);
             $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
         });
 
