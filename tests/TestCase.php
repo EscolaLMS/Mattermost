@@ -5,6 +5,7 @@ namespace EscolaLms\Mattermost\Tests;
 use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
+use EscolaLms\Tags\EscolaLmsTagsServiceProvider;
 use GuzzleHttp\Middleware;
 use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
 use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
@@ -39,6 +40,7 @@ class TestCase extends CoreTestCase
             EscolaLmsCourseServiceProvider::class,
             EscolaLmsScormServiceProvider::class,
             EscolaLmsSettingsServiceProvider::class,
+            EscolaLmsTagsServiceProvider::class,
         ];
     }
 

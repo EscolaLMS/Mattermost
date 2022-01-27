@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Services\Contracts;
 
 use EscolaLms\Core\Models\User;
+use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use Psr\Http\Message\ResponseInterface;
 
 interface MattermostServiceContract
@@ -11,7 +12,7 @@ interface MattermostServiceContract
 
     public function addUserToTeam(User $user, $teamDisplayName = "Courses"): bool;
 
-    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = "Courses"): bool;
+    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = "Courses", $channelRole = MattermostRoleEnum::MEMBER): bool;
 
     public function getOrCreateTeam(string $displayName): ResponseInterface;
 
@@ -30,4 +31,6 @@ interface MattermostServiceContract
     public function blockUser(User $user): bool;
 
     public function deleteUser(User $user): bool;
+
+    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = "Courses"): bool;
 }

@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Tests\Services;
 
 use EscolaLms\Core\Tests\CreatesUsers;
+use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Tests\TestCase;
 use GuzzleHttp\Psr7\Response;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
@@ -43,6 +44,7 @@ class ServiceTest extends TestCase
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
@@ -116,5 +118,27 @@ class ServiceTest extends TestCase
 
         $this->mock->append(new Response(404, ['Token' => 'Token']));
         $this->assertFalse($this->service->blockUser($this->user));
+    }
+
+    public function testAddTutorToChanel(): void
+    {
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+
+        $this->assertTrue($this->service->addUserToChannel($this->user, 'Channel name', 'Courses', MattermostRoleEnum::CHANNEL_ADMIN));
+    }
+
+    public function testRemoveUserFromChannel(): void
+    {
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
+
+        $this->assertTrue($this->service->removeUserFromChannel($this->user, 'Channel name'));
     }
 }

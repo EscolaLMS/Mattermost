@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Services;
 
 use EscolaLms\Core\Models\User;
+use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Gnello\Mattermost\Driver;
 use Gnello\Mattermost\Laravel\Facades\Mattermost;
@@ -34,7 +35,7 @@ class MattermostService implements MattermostServiceContract
             echo 'Everything is ok.';
             dd(json_decode($result->getBody()));
         } else {
-            echo 'HTTP ERROR '.$result->getStatusCode();
+            echo 'HTTP ERROR ' . $result->getStatusCode();
             dd(json_decode($result->getBody()));
         }
     }
@@ -64,7 +65,8 @@ class MattermostService implements MattermostServiceContract
         return false;
     }
 
-    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
+                                     $channelRole = MattermostRoleEnum::MEMBER): bool
     {
         $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
         $mmUser = $this->getData($this->getOrCreateUser($user));
@@ -75,6 +77,10 @@ class MattermostService implements MattermostServiceContract
             $result = $channels->addUser($channel->id, [
                 'user_id' => $mmUser->id,
             ]);
+
+            if ($result->getStatusCode() < 400) {
+                $result = $channels->updateChannelRoles($channel->id, $mmUser->id, ['roles' => $channelRole]);
+            }
 
             return $result->getStatusCode() < 400;
         }
@@ -180,7 +186,7 @@ class MattermostService implements MattermostServiceContract
 
         $users = $this->driver->getUserModel();
 
-        $newPassword = Str::random().rand(0, 9).'!';
+        $newPassword = Str::random() . rand(0, 9) . '!';
 
         $result = $users->updateUserPassword($mmUser->id, [
             'new_password' => $newPassword,
@@ -221,7 +227,7 @@ class MattermostService implements MattermostServiceContract
             $result = $channels->getChannelsForUser($userData->id, $userTeamData->id);
             $channelsData = json_decode($result->getBody());
             foreach ($channelsData as $channelData) {
-                $channelData->url = 'https://'.$server.'/'.$userTeamData->name.'/'.$channelData->name;
+                $channelData->url = 'https://' . $server . '/' . $userTeamData->name . '/' . $channelData->name;
             }
             $userTeamData->channels = $channelsData;
         }
@@ -267,5 +273,22 @@ class MattermostService implements MattermostServiceContract
         }
 
         return $result->getStatusCode() === 200;
+    }
+
+    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+    {
+        $channelModel = $this->driver->getChannelModel();
+        $mmUser = $this->getData($this->driver->getUserModel()->getUserByEmail($user->email));
+        $channel = $this->getData(
+            $channelModel->getChannelByNameAndTeamName(Str::slug($teamDisplayName), Str::slug($channelDisplayName))
+        );
+
+        if (isset($mmUser->id) && isset($channel->id)) {
+            $response = $channelModel->removeUserFromChannel($channel->id, $mmUser->id);
+
+            return $response->getStatusCode() === 200;
+        }
+
+        return false;
     }
 }
