@@ -10,8 +10,10 @@ use EscolaLms\Auth\Events\EscolaLmsAccountConfirmedTemplateEvent;
 use EscolaLms\Auth\Events\EscolaLmsAccountDeletedTemplateEvent;
 use EscolaLms\Courses\Events\CourseAssigned;
 use EscolaLms\Courses\Events\CourseTutorAssigned;
+use EscolaLms\Courses\Events\CourseTutorUnassigned;
 use EscolaLms\Courses\Events\EscolaLmsCourseAssignedTemplateEvent;
 use EscolaLms\Courses\Events\EscolaLmsCourseTutorAssignedEvent;
+use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Illuminate\Support\Facades\Config;
@@ -62,7 +64,16 @@ class EventServiceProvider extends ServiceProvider
              */
             $user = $event->getUser();
             $course = $event->getCourse();
-            app(MattermostServiceContract::class)->addTutorToChannel($user, $course->title);
+            app(MattermostServiceContract::class)->addUserToChannel($user, $course->title, 'Courses', MattermostRoleEnum::CHANNEL_ADMIN);
+        });
+
+        Event::listen(CourseTutorUnassigned::class, function ($event) {
+            /**
+             * >>> event(new EscolaLms\Courses\Events\CourseTutorUnassigned(App\Models\User::find(9), EscolaLms\Courses\Models\Course::find(6)));
+             */
+            $user = $event->getUser();
+            $course = $event->getCourse();
+//            app(MattermostServiceContract::class)->removeTutorFromChannel($user, $course->title);
         });
     }
 }

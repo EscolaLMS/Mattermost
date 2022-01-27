@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Tests\Services;
 
 use EscolaLms\Core\Tests\CreatesUsers;
+use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Tests\TestCase;
 use GuzzleHttp\Psr7\Response;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
@@ -43,6 +44,7 @@ class ServiceTest extends TestCase
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
@@ -120,20 +122,14 @@ class ServiceTest extends TestCase
 
     public function testAddTutorToChanel(): void
     {
-        $response = new Response(200, ['Token' => 'Token'], json_encode(["id" => 123]));
-        $this->mock->append($response);
-        $this->mock->append($response);
-        $this->mock->append($response);
-        $this->mock->append($response);
-        $this->mock->append($response);
-        $this->mock->append($response);
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
 
-        $response = new Response(200, ['Token' => 'Token'], "");
-        $this->mock->append($response);
-        $this->mock->append($response);
-        $this->mock->append($response);
-        $this->mock->append($response);
-
-        $this->assertTrue($this->service->addTutorToChannel($this->user, 'Courses'));
+        $this->assertTrue($this->service->addUserToChannel($this->user, 'Channel name', 'Courses', MattermostRoleEnum::CHANNEL_ADMIN));
     }
 }

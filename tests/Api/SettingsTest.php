@@ -254,7 +254,7 @@ class SettingsTest extends TestCase
         $this->refreshApplication();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addTutorToChannel')->never();
+            $mock->shouldReceive('addUserToChannel')->never();
         });
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);
@@ -268,7 +268,7 @@ class SettingsTest extends TestCase
         $course = Course::factory()->make()->toArray();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addTutorToChannel')->once()->andReturn(true);
+            $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
         });
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);

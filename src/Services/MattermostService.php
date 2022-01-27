@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Services;
 
 use EscolaLms\Core\Models\User;
+use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Gnello\Mattermost\Driver;
 use Gnello\Mattermost\Laravel\Facades\Mattermost;
@@ -64,7 +65,8 @@ class MattermostService implements MattermostServiceContract
         return false;
     }
 
-    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
+                                     $channelRole = MattermostRoleEnum::MEMBER): bool
     {
         $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
         $mmUser = $this->getData($this->getOrCreateUser($user));
@@ -75,6 +77,10 @@ class MattermostService implements MattermostServiceContract
             $result = $channels->addUser($channel->id, [
                 'user_id' => $mmUser->id,
             ]);
+
+            if ($result->getStatusCode() < 400) {
+                $result = $channels->updateChannelRoles($channel->id, $mmUser->id, ['roles' => $channelRole]);
+            }
 
             return $result->getStatusCode() < 400;
         }
@@ -269,20 +275,33 @@ class MattermostService implements MattermostServiceContract
         return $result->getStatusCode() === 200;
     }
 
-    public function addTutorToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
-                                     $channelRole = 'channel_admin'): bool
-    {
-        $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
-        $mmUser = $this->getData($this->getOrCreateUser($user));
-        $result = $this->addUserToChannel($user, $channelDisplayName, $teamDisplayName);
+//    public function addTutorToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
+//                                     $channelRole = 'channel_admin'): bool
+//    {
+//        $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
+//        $mmUser = $this->getData($this->getOrCreateUser($user));
+//        $result = $this->addUserToChannel($user, $channelDisplayName, $teamDisplayName);
+//
+//        if ($result && isset($channel->id) && isset($mmUser->id)) {
+//            $channelModel = $this->driver->getChannelModel();
+//            $result = $channelModel->updateChannelRoles($channel->id, $mmUser->id, ['roles' => $channelRole]);
+//
+//            return $result->getStatusCode() === 200;
+//        }
+//
+//        return false;
+//    }
 
-        if ($result && isset($channel->id) && isset($mmUser->id)) {
-            $channelModel = $this->driver->getChannelModel();
-            $result = $channelModel->updateChannelRoles($channel->id, $mmUser->id, ['roles' => $channelRole]);
-
-            return $result->getStatusCode() === 200;
-        }
-
-        return false;
-    }
+//    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+//    {
+//        $team = $this->driver->getTeamModel()->getTeamByName(Str::slug($teamDisplayName));
+//        $channelModel = $this->driver->getChannelModel();
+//        $channel = $channelModel->getChannelByName($)
+//        $mmUser = $this->driver->getUserModel()->getUserByEmail($user->email);
+//
+//
+//        if ($userModel->getStatusCode() < 400) {
+//            return $result;
+//        }
+//    }
 }
