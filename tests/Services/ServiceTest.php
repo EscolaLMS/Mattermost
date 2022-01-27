@@ -117,4 +117,23 @@ class ServiceTest extends TestCase
         $this->mock->append(new Response(404, ['Token' => 'Token']));
         $this->assertFalse($this->service->blockUser($this->user));
     }
+
+    public function testAddTutorToChanel(): void
+    {
+        $response = new Response(200, ['Token' => 'Token'], json_encode(["id" => 123]));
+        $this->mock->append($response);
+        $this->mock->append($response);
+        $this->mock->append($response);
+        $this->mock->append($response);
+        $this->mock->append($response);
+        $this->mock->append($response);
+
+        $response = new Response(200, ['Token' => 'Token'], "");
+        $this->mock->append($response);
+        $this->mock->append($response);
+        $this->mock->append($response);
+        $this->mock->append($response);
+
+        $this->assertTrue($this->service->addTutorToChannel($this->user, 'Courses'));
+    }
 }

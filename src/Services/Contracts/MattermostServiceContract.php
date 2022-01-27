@@ -30,4 +30,6 @@ interface MattermostServiceContract
     public function blockUser(User $user): bool;
 
     public function deleteUser(User $user): bool;
+
+    public function addTutorToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses', $channelRole = 'channel_admin'): bool;
 }

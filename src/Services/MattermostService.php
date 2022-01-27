@@ -34,7 +34,7 @@ class MattermostService implements MattermostServiceContract
             echo 'Everything is ok.';
             dd(json_decode($result->getBody()));
         } else {
-            echo 'HTTP ERROR '.$result->getStatusCode();
+            echo 'HTTP ERROR ' . $result->getStatusCode();
             dd(json_decode($result->getBody()));
         }
     }
@@ -180,7 +180,7 @@ class MattermostService implements MattermostServiceContract
 
         $users = $this->driver->getUserModel();
 
-        $newPassword = Str::random().rand(0, 9).'!';
+        $newPassword = Str::random() . rand(0, 9) . '!';
 
         $result = $users->updateUserPassword($mmUser->id, [
             'new_password' => $newPassword,
@@ -221,7 +221,7 @@ class MattermostService implements MattermostServiceContract
             $result = $channels->getChannelsForUser($userData->id, $userTeamData->id);
             $channelsData = json_decode($result->getBody());
             foreach ($channelsData as $channelData) {
-                $channelData->url = 'https://'.$server.'/'.$userTeamData->name.'/'.$channelData->name;
+                $channelData->url = 'https://' . $server . '/' . $userTeamData->name . '/' . $channelData->name;
             }
             $userTeamData->channels = $channelsData;
         }
@@ -267,5 +267,22 @@ class MattermostService implements MattermostServiceContract
         }
 
         return $result->getStatusCode() === 200;
+    }
+
+    public function addTutorToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
+                                     $channelRole = 'channel_admin'): bool
+    {
+        $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
+        $mmUser = $this->getData($this->getOrCreateUser($user));
+        $result = $this->addUserToChannel($user, $channelDisplayName, $teamDisplayName);
+
+        if ($result && isset($channel->id) && isset($mmUser->id)) {
+            $channelModel = $this->driver->getChannelModel();
+            $result = $channelModel->updateChannelRoles($channel->id, $mmUser->id, ['roles' => $channelRole]);
+
+            return $result->getStatusCode() === 200;
+        }
+
+        return false;
     }
 }

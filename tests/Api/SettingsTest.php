@@ -239,4 +239,39 @@ class SettingsTest extends TestCase
             'users' => [$student2->getKey()]
         ])->assertOk();
     }
+
+    public function testAddTutorToChannelWhenPackageIsDisabledOrEnabled(): void
+    {
+        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
+            $this->markTestSkipped('Courses package not installed');
+        }
+
+        $course = Course::factory()->make()->toArray();
+
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addTutorToChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);
+        $this->response->assertStatus(201);
+
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
+
+        $course = Course::factory()->make()->toArray();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addTutorToChannel')->once()->andReturn(true);
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);
+        $this->response->assertStatus(201);
+    }
 }
