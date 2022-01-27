@@ -275,33 +275,20 @@ class MattermostService implements MattermostServiceContract
         return $result->getStatusCode() === 200;
     }
 
-//    public function addTutorToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
-//                                     $channelRole = 'channel_admin'): bool
-//    {
-//        $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
-//        $mmUser = $this->getData($this->getOrCreateUser($user));
-//        $result = $this->addUserToChannel($user, $channelDisplayName, $teamDisplayName);
-//
-//        if ($result && isset($channel->id) && isset($mmUser->id)) {
-//            $channelModel = $this->driver->getChannelModel();
-//            $result = $channelModel->updateChannelRoles($channel->id, $mmUser->id, ['roles' => $channelRole]);
-//
-//            return $result->getStatusCode() === 200;
-//        }
-//
-//        return false;
-//    }
+    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+    {
+        $channelModel = $this->driver->getChannelModel();
+        $mmUser = $this->getData($this->driver->getUserModel()->getUserByEmail($user->email));
+        $channel = $this->getData(
+            $channelModel->getChannelByNameAndTeamName(Str::slug($teamDisplayName), Str::slug($channelDisplayName))
+        );
 
-//    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
-//    {
-//        $team = $this->driver->getTeamModel()->getTeamByName(Str::slug($teamDisplayName));
-//        $channelModel = $this->driver->getChannelModel();
-//        $channel = $channelModel->getChannelByName($)
-//        $mmUser = $this->driver->getUserModel()->getUserByEmail($user->email);
-//
-//
-//        if ($userModel->getStatusCode() < 400) {
-//            return $result;
-//        }
-//    }
+        if (isset($mmUser->id) && isset($channel->id)) {
+            $response = $channelModel->removeUserFromChannel($channel->id, $mmUser->id);
+
+            return $response->getStatusCode() === 200;
+        }
+
+        return false;
+    }
 }

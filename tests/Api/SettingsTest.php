@@ -25,9 +25,22 @@ class SettingsTest extends TestCase
     {
         parent::setUp();
 
+        if (!class_exists(\EscolaLms\Auth\EscolaLmsAuthServiceProvider::class)) {
+            $this->markTestSkipped('Auth package not installed');
+        }
+
         if (!class_exists(\EscolaLms\Settings\EscolaLmsSettingsServiceProvider::class)) {
             $this->markTestSkipped('Settings package not installed');
         }
+
+        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
+            $this->markTestSkipped('Courses package not installed');
+        }
+
+        if (!class_exists(\EscolaLms\Scorm\EscolaLmsScormServiceProvider::class)) {
+            $this->markTestSkipped('Scorm package not installed');
+        }
+
         $this->seed(PermissionTableSeeder::class);
         $this->seed(AuthPermissionSeeder::class);
         Config::set('escola_settings.use_database', true);
@@ -154,10 +167,6 @@ class SettingsTest extends TestCase
 
     public function testAccountConfirmedTemplateEventListenerWithPackageStatusSetting(): void
     {
-        if (!class_exists(\EscolaLms\Auth\EscolaLmsAuthServiceProvider::class)) {
-            $this->markTestSkipped('Auth package not installed');
-        }
-
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
         Config::set('escola_settings.use_database', true);
         AdministrableConfig::storeConfig();
@@ -195,14 +204,6 @@ class SettingsTest extends TestCase
 
     public function testCourseAssignedTemplateEventListenerWithPackageStatusSetting(): void
     {
-        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
-            $this->markTestSkipped('Courses package not installed');
-        }
-
-        if (!class_exists(\EscolaLms\Scorm\EscolaLmsScormServiceProvider::class)) {
-            $this->markTestSkipped('Scorm package not installed');
-        }
-
         $course = Course::factory()->create([
             'author_id' => $this->user->getKey(),
             'base_price' => 997,
@@ -240,12 +241,8 @@ class SettingsTest extends TestCase
         ])->assertOk();
     }
 
-    public function testAddTutorToChannelWhenPackageIsDisabledOrEnabled(): void
+    public function testAddTutorToChannelWhenPackageIsDisabledAndEnabled(): void
     {
-        if (!class_exists(\EscolaLms\Courses\EscolaLmsCourseServiceProvider::class)) {
-            $this->markTestSkipped('Courses package not installed');
-        }
-
         $course = Course::factory()->make()->toArray();
 
         Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
@@ -273,5 +270,43 @@ class SettingsTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);
         $this->response->assertStatus(201);
+    }
+
+    public function testRemoveTutorFromChannelWhenPackageIsDisabledAndEnabled(): void
+    {
+        $course = Course::factory()->create();
+        $editedCourse = $course->toArray();
+        $editedCourse['authors'] = [];
+
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('removeUserFromChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson(
+            '/api/admin/courses/' . $course->getKey(),
+            $editedCourse
+        )->assertStatus(200);
+
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
+        });
+
+        $course->authors()->sync($this->makeInstructor()->getKey());;
+        $editedCourse['authors'] = [];
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson(
+            '/api/admin/courses/' . $course->getKey(),
+            $editedCourse
+        )->assertStatus(200);
     }
 }

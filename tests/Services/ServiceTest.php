@@ -132,4 +132,13 @@ class ServiceTest extends TestCase
 
         $this->assertTrue($this->service->addUserToChannel($this->user, 'Channel name', 'Courses', MattermostRoleEnum::CHANNEL_ADMIN));
     }
+
+    public function testRemoveUserFromChannel(): void
+    {
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
+        $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
+
+        $this->assertTrue($this->service->removeUserFromChannel($this->user, 'Channel name'));
+    }
 }
