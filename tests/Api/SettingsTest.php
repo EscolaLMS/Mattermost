@@ -8,6 +8,7 @@ use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Courses\Database\Seeders\CoursesPermissionSeeder;
 use EscolaLms\Courses\Enum\CourseStatusEnum;
 use EscolaLms\Courses\Models\Course;
+use EscolaLms\Courses\Tests\Models\User;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Providers\SettingsServiceProvider;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
@@ -313,5 +314,42 @@ class SettingsTest extends TestCase
             '/api/admin/courses/' . $course->getKey(),
             $editedCourse
         )->assertStatus(200);
+    }
+
+    public function testRemoveUserFromChannelWhenPackageIsDisabledAndEnabled(): void
+    {
+        $student = $this->makeStudent();
+        $course = Course::factory()->create();
+        $course->users()->sync([$student->getKey()]);
+
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->never();
+            $mock->shouldReceive('removeUserFromChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->post('/api/admin/courses/' . $course->getKey() . '/access/remove/', [
+            'users' => [$student->getKey()]
+        ])->assertOk();
+
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->andReturn(true);
+            $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
+        });
+
+        $course->users()->sync([$student->getKey()]);
+
+        $this->response = $this->actingAs($this->user, 'api')->post('/api/admin/courses/' . $course->getKey() . '/access/remove/', [
+            'users' => [$student->getKey()]
+        ])->assertOk();
     }
 }
