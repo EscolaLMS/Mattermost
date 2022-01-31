@@ -169,7 +169,7 @@ class SettingsTest extends TestCase
 
     public function testAccountConfirmedTemplateEventListenerWithPackageStatusSetting(): void
     {
-        $this->disablePackage();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $student1 = $this->makeStudent([
             'email_verified_at' => null
@@ -183,7 +183,7 @@ class SettingsTest extends TestCase
             'email_verified' => true,
         ])->assertOk();
 
-        $this->enablePackage();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $student2 = $this->makeStudent([
             'email_verified_at' => null
@@ -206,7 +206,7 @@ class SettingsTest extends TestCase
             'status' => CourseStatusEnum::PUBLISHED,
         ]);
 
-        $this->disablePackage();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $student1 = $this->makeStudent();
 
@@ -218,7 +218,7 @@ class SettingsTest extends TestCase
             'users' => [$student1->getKey()]
         ])->assertOk();
 
-        $this->enablePackage();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $student2 = $this->makeStudent();
 
@@ -235,7 +235,7 @@ class SettingsTest extends TestCase
     {
         $course = Course::factory()->make()->toArray();
 
-        $this->disablePackage();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
@@ -244,7 +244,7 @@ class SettingsTest extends TestCase
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course)
             ->assertStatus(201);
 
-        $this->enablePackage();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $course = Course::factory()->make()->toArray();
 
@@ -263,7 +263,7 @@ class SettingsTest extends TestCase
         $editedCourse = $course->toArray();
         $editedCourse['authors'] = [];
 
-        $this->disablePackage();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
@@ -275,7 +275,7 @@ class SettingsTest extends TestCase
             $editedCourse
         )->assertStatus(200);
 
-        $this->enablePackage();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->andReturn(true);
@@ -297,7 +297,7 @@ class SettingsTest extends TestCase
         $course = Course::factory()->create();
         $course->users()->sync([$student->getKey()]);
 
-        $this->disablePackage();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
@@ -308,7 +308,7 @@ class SettingsTest extends TestCase
             'users' => [$student->getKey()]
         ])->assertOk();
 
-        $this->enablePackage();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->andReturn(true);
@@ -322,17 +322,9 @@ class SettingsTest extends TestCase
         ])->assertOk();
     }
 
-    private function disablePackage(): void
+    private function setPackageStatus($packageStatus): void
     {
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
-    }
-
-    private function enablePackage(): void
-    {
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', $packageStatus);
         Config::set('escola_settings.use_database', true);
         AdministrableConfig::storeConfig();
         $this->refreshApplication();
