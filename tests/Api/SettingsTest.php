@@ -169,10 +169,7 @@ class SettingsTest extends TestCase
 
     public function testAccountConfirmedTemplateEventListenerWithPackageStatusSetting(): void
     {
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $student1 = $this->makeStudent([
             'email_verified_at' => null
@@ -186,10 +183,7 @@ class SettingsTest extends TestCase
             'email_verified' => true,
         ])->assertOk();
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $student2 = $this->makeStudent([
             'email_verified_at' => null
@@ -212,10 +206,7 @@ class SettingsTest extends TestCase
             'status' => CourseStatusEnum::PUBLISHED,
         ]);
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $student1 = $this->makeStudent();
 
@@ -227,10 +218,7 @@ class SettingsTest extends TestCase
             'users' => [$student1->getKey()]
         ])->assertOk();
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $student2 = $this->makeStudent();
 
@@ -247,22 +235,16 @@ class SettingsTest extends TestCase
     {
         $course = Course::factory()->make()->toArray();
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
         });
 
-        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);
-        $this->response->assertStatus(201);
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course)
+            ->assertStatus(201);
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $course = Course::factory()->make()->toArray();
 
@@ -270,8 +252,8 @@ class SettingsTest extends TestCase
             $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
         });
 
-        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course);
-        $this->response->assertStatus(201);
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses', $course)
+            ->assertStatus(201);
     }
 
     public function testRemoveTutorFromChannelWhenPackageIsDisabledAndEnabled(): void
@@ -281,10 +263,7 @@ class SettingsTest extends TestCase
         $editedCourse = $course->toArray();
         $editedCourse['authors'] = [];
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::DISABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
@@ -296,10 +275,7 @@ class SettingsTest extends TestCase
             $editedCourse
         )->assertStatus(200);
 
-        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', PackageStatusEnum::ENABLED);
-        Config::set('escola_settings.use_database', true);
-        AdministrableConfig::storeConfig();
-        $this->refreshApplication();
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->andReturn(true);
@@ -313,5 +289,44 @@ class SettingsTest extends TestCase
             '/api/admin/courses/' . $course->getKey(),
             $editedCourse
         )->assertStatus(200);
+    }
+
+    public function testRemoveUserFromChannelWhenPackageIsDisabledAndEnabled(): void
+    {
+        $student = $this->makeStudent();
+        $course = Course::factory()->create();
+        $course->users()->sync([$student->getKey()]);
+
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->never();
+            $mock->shouldReceive('removeUserFromChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses/' . $course->getKey() . '/access/remove/', [
+            'users' => [$student->getKey()]
+        ])->assertOk();
+
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->andReturn(true);
+            $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
+        });
+
+        $course->users()->sync([$student->getKey()]);
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses/' . $course->getKey() . '/access/remove/', [
+            'users' => [$student->getKey()]
+        ])->assertOk();
+    }
+
+    private function setPackageStatus($packageStatus): void
+    {
+        Config::set(SettingsServiceProvider::CONFIG_KEY . '.package_status', $packageStatus);
+        Config::set('escola_settings.use_database', true);
+        AdministrableConfig::storeConfig();
+        $this->refreshApplication();
     }
 }

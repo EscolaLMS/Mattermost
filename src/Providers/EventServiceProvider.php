@@ -8,6 +8,7 @@ use EscolaLms\Auth\Events\AccountDeleted;
 use EscolaLms\Courses\Events\CourseAssigned;
 use EscolaLms\Courses\Events\CourseTutorAssigned;
 use EscolaLms\Courses\Events\CourseTutorUnassigned;
+use EscolaLms\Courses\Events\CourseUnassigned;
 use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
@@ -37,6 +38,15 @@ class EventServiceProvider extends ServiceProvider
             $user = $event->getUser();
             $course = $event->getCourse();
             app(MattermostServiceContract::class)->addUserToChannel($user, $course->title);
+        });
+
+        Event::listen(CourseUnassigned::class, function ($event) {
+            /**
+             * >>> event(new EscolaLms\Courses\Events\CourseUnassigned(App\Models\User::find(3), EscolaLms\Courses\Models\Course::find(1)));
+             */
+            $user = $event->getUser();
+            $course = $event->getCourse();
+            app(MattermostServiceContract::class)->removeUserFromChannel($user, $course->title);
         });
 
         Event::listen(AccountBlocked::class, function ($event) {
