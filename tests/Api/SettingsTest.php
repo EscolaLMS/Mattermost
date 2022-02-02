@@ -14,13 +14,14 @@ use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
 use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
 use EscolaLms\Settings\Facades\AdministrableConfig;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
 
 class SettingsTest extends TestCase
 {
-    use CreatesUsers, ApiTestTrait, WithoutMiddleware;
+    use CreatesUsers, ApiTestTrait, WithoutMiddleware, DatabaseTransactions;
 
     protected function setUp(): void
     {
