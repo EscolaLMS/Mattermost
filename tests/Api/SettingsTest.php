@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Tests\API;
 
 use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
+use EscolaLms\Auth\Models\User;
 use EscolaLms\Core\Tests\ApiTestTrait;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Courses\Database\Seeders\CoursesPermissionSeeder;
@@ -14,14 +15,13 @@ use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
 use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
 use EscolaLms\Settings\Facades\AdministrableConfig;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
 
 class SettingsTest extends TestCase
 {
-    use CreatesUsers, ApiTestTrait, WithoutMiddleware, DatabaseTransactions;
+    use CreatesUsers, ApiTestTrait, WithoutMiddleware;
 
     protected function setUp(): void
     {
@@ -56,6 +56,8 @@ class SettingsTest extends TestCase
     protected function tearDown(): void
     {
         \EscolaLms\Settings\Models\Config::truncate();
+        User::truncate();
+        Course::truncate();
     }
 
     public function testAdministrableConfigApi(): void
