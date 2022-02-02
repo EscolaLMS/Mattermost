@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Tests\API;
 
 use EscolaLms\Auth\Database\Seeders\AuthPermissionSeeder;
+use EscolaLms\Auth\Models\User;
 use EscolaLms\Core\Tests\ApiTestTrait;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Courses\Database\Seeders\CoursesPermissionSeeder;
@@ -55,6 +56,8 @@ class SettingsTest extends TestCase
     protected function tearDown(): void
     {
         \EscolaLms\Settings\Models\Config::truncate();
+        User::query()->delete();
+        Course::query()->delete();
     }
 
     public function testAdministrableConfigApi(): void
