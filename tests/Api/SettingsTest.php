@@ -56,8 +56,8 @@ class SettingsTest extends TestCase
     protected function tearDown(): void
     {
         \EscolaLms\Settings\Models\Config::truncate();
-        User::truncate();
-        Course::truncate();
+        User::query()->delete();
+        Course::query()->delete();
     }
 
     public function testAdministrableConfigApi(): void
