@@ -15,6 +15,7 @@ use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
 use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
 use EscolaLms\Settings\Facades\AdministrableConfig;
+use EscolaLms\Webinar\Database\Seeders\WebinarsPermissionSeeder;
 use EscolaLms\Webinar\Models\Webinar;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
@@ -47,6 +48,7 @@ class SettingsTest extends TestCase
         $this->seed(PermissionTableSeeder::class);
         $this->seed(AuthPermissionSeeder::class);
         $this->seed(CoursesPermissionSeeder::class);
+        $this->seed(WebinarsPermissionSeeder::class);
         Config::set('escola_settings.use_database', true);
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
@@ -361,6 +363,10 @@ class SettingsTest extends TestCase
 
     public function testRemoveAuthorFromWebinar(): void
     {
+        if (!class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
+            $this->markTestSkipped('Webinar package not installed');
+        }
+
         $author = $this->makeStudent();
         $webinar = Webinar::factory()->create();
         $webinar->authors()->sync([$author->getKey()]);
@@ -376,7 +382,7 @@ class SettingsTest extends TestCase
         ])->assertOk();
 
         $this->setPackageStatus(PackageStatusEnum::ENABLED);
-        
+
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
         });
