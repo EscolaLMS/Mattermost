@@ -61,6 +61,7 @@ class SettingsTest extends TestCase
         \EscolaLms\Settings\Models\Config::truncate();
         User::query()->delete();
         Course::query()->delete();
+        Webinar::query()->delete();
     }
 
     public function testAdministrableConfigApi(): void
