@@ -6,6 +6,7 @@ use EscolaLms\Auth\EscolaLmsAuthServiceProvider;
 use EscolaLms\Courses\EscolaLmsCourseServiceProvider;
 use EscolaLms\Scorm\EscolaLmsScormServiceProvider;
 use EscolaLms\Tags\EscolaLmsTagsServiceProvider;
+use EscolaLms\Webinar\EscolaLmsWebinarServiceProvider;
 use GuzzleHttp\Middleware;
 use EscolaLms\Mattermost\EscolaLmsMattermostServiceProvider;
 use EscolaLms\Settings\EscolaLmsSettingsServiceProvider;
@@ -41,6 +42,7 @@ class TestCase extends CoreTestCase
             EscolaLmsScormServiceProvider::class,
             EscolaLmsSettingsServiceProvider::class,
             EscolaLmsTagsServiceProvider::class,
+            EscolaLmsWebinarServiceProvider::class,
         ];
     }
 

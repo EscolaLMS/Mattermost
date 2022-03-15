@@ -15,6 +15,7 @@ use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
 use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
 use EscolaLms\Settings\Facades\AdministrableConfig;
+use EscolaLms\Webinar\Models\Webinar;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
@@ -322,6 +323,68 @@ class SettingsTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses/' . $course->getKey() . '/access/remove/', [
             'users' => [$student->getKey()]
+        ])->assertOk();
+    }
+
+    public function testAddWebinarAuthorToChannel(): void
+    {
+        if (!class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
+            $this->markTestSkipped('Webinar package not installed');
+        }
+
+        $webinar = Webinar::factory()->make()->toArray();
+        $author = $this->makeInstructor();
+
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
+            array_merge($webinar, ['authors' => [$author->getKey()]])
+        )->assertStatus(201);
+
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
+
+        $webinar = Webinar::factory()->make()->toArray();
+        $author = $this->makeInstructor();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
+            array_merge($webinar, ['authors' => [$author->getKey()]])
+        )->assertStatus(201);
+    }
+
+    public function testRemoveAuthorFromWebinar(): void
+    {
+        $author = $this->makeStudent();
+        $webinar = Webinar::factory()->create();
+        $webinar->authors()->sync([$author->getKey()]);
+
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('removeUserFromChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars/' . $webinar->getKey(), [
+            'authors' => []
+        ])->assertOk();
+
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
+        
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
+        });
+
+        $webinar->authors()->sync([$author->getKey()]);
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars/' . $webinar->getKey(), [
+            'authors' => []
         ])->assertOk();
     }
 
