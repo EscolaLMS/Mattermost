@@ -335,7 +335,10 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Webinar package not installed');
         }
 
-        $webinar = Webinar::factory()->make()->toArray();
+        $webinar = Webinar::factory()->make([
+            'active_from' => now()->format('Y-m-d H:i'),
+            'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
+        ])->toArray();
         $author = $this->makeInstructor();
 
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
@@ -350,7 +353,10 @@ class SettingsTest extends TestCase
 
         $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
-        $webinar = Webinar::factory()->make()->toArray();
+        $webinar = Webinar::factory()->make([
+            'active_from' => now()->format('Y-m-d H:i'),
+            'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
+        ])->toArray();
         $author = $this->makeInstructor();
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
@@ -369,7 +375,10 @@ class SettingsTest extends TestCase
         }
 
         $author = $this->makeStudent();
-        $webinar = Webinar::factory()->create();
+        $webinar = Webinar::factory()->create([
+            'active_from' => now()->format('Y-m-d H:i'),
+            'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
+        ]);
         $webinar->authors()->sync([$author->getKey()]);
 
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
