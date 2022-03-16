@@ -15,6 +15,8 @@ use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
 use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
 use EscolaLms\Settings\Facades\AdministrableConfig;
+use EscolaLms\Webinar\Database\Seeders\WebinarsPermissionSeeder;
+use EscolaLms\Webinar\Models\Webinar;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
@@ -46,6 +48,7 @@ class SettingsTest extends TestCase
         $this->seed(PermissionTableSeeder::class);
         $this->seed(AuthPermissionSeeder::class);
         $this->seed(CoursesPermissionSeeder::class);
+        $this->seed(WebinarsPermissionSeeder::class);
         Config::set('escola_settings.use_database', true);
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
@@ -58,6 +61,7 @@ class SettingsTest extends TestCase
         \EscolaLms\Settings\Models\Config::truncate();
         User::query()->delete();
         Course::query()->delete();
+        Webinar::query()->delete();
     }
 
     public function testAdministrableConfigApi(): void
@@ -322,6 +326,81 @@ class SettingsTest extends TestCase
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/courses/' . $course->getKey() . '/access/remove/', [
             'users' => [$student->getKey()]
+        ])->assertOk();
+    }
+
+    public function testAddWebinarAuthorToChannel(): void
+    {
+        if (!class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
+            $this->markTestSkipped('Webinar package not installed');
+        }
+
+        $webinar = Webinar::factory()->make([
+            'active_from' => now()->format('Y-m-d H:i'),
+            'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
+        ])->toArray();
+        $author = $this->makeInstructor();
+
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
+            array_merge($webinar, ['authors' => [$author->getKey()]])
+        )->assertStatus(201);
+
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
+
+        $webinar = Webinar::factory()->make([
+            'active_from' => now()->format('Y-m-d H:i'),
+            'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
+        ])->toArray();
+        $author = $this->makeInstructor();
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
+            array_merge($webinar, ['authors' => [$author->getKey()]])
+        )->assertStatus(201);
+    }
+
+    public function testRemoveAuthorFromWebinar(): void
+    {
+        if (!class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
+            $this->markTestSkipped('Webinar package not installed');
+        }
+
+        $author = $this->makeStudent();
+        $webinar = Webinar::factory()->create([
+            'active_from' => now()->format('Y-m-d H:i'),
+            'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
+        ]);
+        $webinar->authors()->sync([$author->getKey()]);
+
+        $this->setPackageStatus(PackageStatusEnum::DISABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('removeUserFromChannel')->never();
+        });
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars/' . $webinar->getKey(), [
+            'authors' => []
+        ])->assertOk();
+
+        $this->setPackageStatus(PackageStatusEnum::ENABLED);
+
+        $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
+        });
+
+        $webinar->authors()->sync([$author->getKey()]);
+
+        $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars/' . $webinar->getKey(), [
+            'authors' => []
         ])->assertOk();
     }
 

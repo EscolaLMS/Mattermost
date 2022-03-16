@@ -4,6 +4,7 @@ namespace EscolaLms\Mattermost\Services;
 
 use EscolaLms\Core\Models\User;
 use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
+use EscolaLms\Mattermost\Enum\TeamNameEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Gnello\Mattermost\Driver;
 use Gnello\Mattermost\Laravel\Facades\Mattermost;
@@ -47,7 +48,7 @@ class MattermostService implements MattermostServiceContract
         return $result->getStatusCode() < 400;
     }
 
-    public function addUserToTeam(User $user, $teamDisplayName = 'Courses'): bool
+    public function addUserToTeam(User $user, $teamDisplayName = TeamNameEnum::COURSES): bool
     {
         $team = $this->getData($this->getOrCreateTeam($teamDisplayName));
         $user = $this->getData($this->getOrCreateUser($user));
@@ -65,7 +66,7 @@ class MattermostService implements MattermostServiceContract
         return false;
     }
 
-    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses',
+    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = TeamNameEnum::COURSES,
                                      $channelRole = MattermostRoleEnum::MEMBER): bool
     {
         $channel = $this->getData($this->getOrCreateChannel($teamDisplayName, $channelDisplayName));
@@ -160,7 +161,7 @@ class MattermostService implements MattermostServiceContract
         return $result;
     }
 
-    public function sendMessage(string $markdown, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+    public function sendMessage(string $markdown, $channelDisplayName, $teamDisplayName = TeamNameEnum::COURSES): bool
     {
         $channels = $this->driver->getChannelModel();
 
@@ -275,7 +276,7 @@ class MattermostService implements MattermostServiceContract
         return $result->getStatusCode() === 200;
     }
 
-    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = 'Courses'): bool
+    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = TeamNameEnum::COURSES): bool
     {
         $channelModel = $this->driver->getChannelModel();
         $mmUser = $this->getData($this->driver->getUserModel()->getUserByEmail($user->email));
