@@ -9,11 +9,11 @@ use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use EscolaLms\Mattermost\Tests\TestCase;
+use EscolaLms\Settings\Models\Config;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
 
-class AuthApiTestTestCase extends TestCase
+class AuthApiTest extends TestCase
 {
     use CreatesUsers, ApiTestTrait, WithoutMiddleware;
 
@@ -21,12 +21,7 @@ class AuthApiTestTestCase extends TestCase
     {
         parent::setUp();
 
-        if (!class_exists(\EscolaLms\Auth\EscolaLmsAuthServiceProvider::class)) {
-            $this->markTestSkipped('Auth package not installed');
-        }
-
         $this->seed(AuthPermissionSeeder::class);
-        Config::set('escola_settings.use_database', true);
         $this->user = config('auth.providers.users.model')::factory()->create();
         $this->user->guard_name = 'api';
         $this->user->assignRole('admin');
