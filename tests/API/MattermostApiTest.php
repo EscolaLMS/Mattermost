@@ -2,19 +2,11 @@
 
 namespace EscolaLms\Mattermost\Tests\API;
 
-use BadMethodCallException;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Mattermost\Tests\TestCase;
-use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\RequestException;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
-use EscolaLms\Mattermost\Services\MattermostService;
 use EscolaLms\Core\Enums\UserRole;
 
 class MattermostApiTest extends TestCase
@@ -32,8 +24,6 @@ class MattermostApiTest extends TestCase
         $this->user->guard_name = 'api';
         $this->user->assignRole(UserRole::STUDENT);
 
-        //$this->user = $this->makeStudent();
-
         $this->service = $this->app->make(MattermostServiceContract::class);
         $this->mock->reset();
     }
@@ -47,7 +37,6 @@ class MattermostApiTest extends TestCase
 
     public function testMe()
     {
-
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123, "name" => "name"])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode([["id" => 123, "name" => "name"]])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode([["id" => 123, "name" => "name"]])));
