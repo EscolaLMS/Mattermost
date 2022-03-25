@@ -13,8 +13,8 @@ use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Enum\PackageStatusEnum;
 use EscolaLms\Mattermost\Enum\TeamNameEnum;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
-use EscolaLms\Webinar\Events\WebinarAuthorAssigned;
-use EscolaLms\Webinar\Events\WebinarAuthorUnassigned;
+use EscolaLms\Webinar\Events\WebinarTrainerAssigned;
+use EscolaLms\Webinar\Events\WebinarTrainerUnassigned;
 use EscolaLms\Webinar\Events\WebinarUserAssigned;
 use EscolaLms\Webinar\Events\WebinarUserUnassigned;
 use Illuminate\Support\Facades\Config;
@@ -98,13 +98,13 @@ class EventServiceProvider extends ServiceProvider
             app(MattermostServiceContract::class)->removeUserFromChannel($user, $webinar->name, TeamNameEnum::WEBINARS);
         });
 
-        Event::listen(WebinarAuthorAssigned::class, function ($event) {
+        Event::listen(WebinarTrainerAssigned::class, function ($event) {
             $user = $event->getUser();
             $webinar = $event->getWebinar();
             app(MattermostServiceContract::class)->addUserToChannel($user, $webinar->name, TeamNameEnum::WEBINARS, MattermostRoleEnum::CHANNEL_ADMIN);
         });
 
-        Event::listen(WebinarAuthorUnassigned::class, function ($event) {
+        Event::listen(WebinarTrainerUnassigned::class, function ($event) {
             $user = $event->getUser();
             $webinar = $event->getWebinar();
             app(MattermostServiceContract::class)->removeUserFromChannel($user, $webinar->name, TeamNameEnum::WEBINARS);

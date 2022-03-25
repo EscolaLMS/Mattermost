@@ -43,14 +43,14 @@ class WebinarApiTest extends TestCase
         Webinar::query()->delete();
     }
 
-    public function testAddWebinarAuthorToChannel(): void
+    public function testAddWebinarTrainerToChannel(): void
     {
         $webinar = Webinar::factory()->make([
             'active_from' => now()->format('Y-m-d H:i'),
             'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
         ])->toArray();
 
-        $author = $this->makeInstructor();
+        $trainer = $this->makeInstructor();
 
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
@@ -63,7 +63,7 @@ class WebinarApiTest extends TestCase
         });
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
-            array_merge($webinar, ['authors' => [$author->getKey()]])
+            array_merge($webinar, ['trainers' => [$trainer->getKey()]])
         )->assertStatus(201);
 
         $this->setPackageStatus(PackageStatusEnum::ENABLED);
@@ -72,7 +72,7 @@ class WebinarApiTest extends TestCase
             'active_from' => now()->format('Y-m-d H:i'),
             'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
         ])->toArray();
-        $author = $this->makeInstructor();
+        $trainer = $this->makeInstructor();
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
@@ -83,18 +83,18 @@ class WebinarApiTest extends TestCase
         });
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
-            array_merge($webinar, ['authors' => [$author->getKey()]])
+            array_merge($webinar, ['trainers' => [$trainer->getKey()]])
         )->assertStatus(201);
     }
 
-    public function testRemoveAuthorFromWebinar(): void
+    public function testRemoveTrainerFromWebinar(): void
     {
-        $author = $this->makeStudent();
+        $trainer = $this->makeStudent();
         $webinar = Webinar::factory()->create([
             'active_from' => now()->format('Y-m-d H:i'),
             'active_to' => now()->modify('+1 hour')->format('Y-m-d H:i'),
         ]);
-        $webinar->authors()->sync([$author->getKey()]);
+        $webinar->trainers()->sync([$trainer->getKey()]);
 
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
@@ -107,7 +107,7 @@ class WebinarApiTest extends TestCase
         });
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars/' . $webinar->getKey(), [
-            'authors' => []
+            'trainers' => []
         ])->assertOk();
 
         $this->setPackageStatus(PackageStatusEnum::ENABLED);
@@ -120,10 +120,10 @@ class WebinarApiTest extends TestCase
             $mock->shouldReceive('removeUserFromChannel')->once()->andReturn(true);
         });
 
-        $webinar->authors()->sync([$author->getKey()]);
+        $webinar->trainers()->sync([$trainer->getKey()]);
 
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars/' . $webinar->getKey(), [
-            'authors' => []
+            'trainers' => []
         ])->assertOk();
     }
 }
