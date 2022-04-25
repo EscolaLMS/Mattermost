@@ -14,6 +14,9 @@
 
 This package is used for [Mattermost](https://mattermost.com/) integration.
 
+It listens for Events then add/remove user for mattermost and particular channels either as standard user or admin. 
+
+
 ## Installing
 - `composer require escolalms/mattermost`
 
