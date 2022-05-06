@@ -56,12 +56,11 @@ class WebinarApiTest extends TestCase
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
-
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
         });
-
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
             array_merge($webinar, ['trainers' => [$trainer->getKey()]])
         )->assertStatus(201);
@@ -75,13 +74,13 @@ class WebinarApiTest extends TestCase
         $trainer = $this->makeInstructor();
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
         });
-
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
             array_merge($webinar, ['trainers' => [$trainer->getKey()]])
         )->assertStatus(201);
@@ -100,7 +99,7 @@ class WebinarApiTest extends TestCase
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('updateYTStream')->once()->andReturn(new YTLiveDtoMock());
-            $mock->shouldReceive('getYtLiveStream')->once()->andReturn(collect(['s']));
+            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect(['s']));
         });
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
@@ -115,7 +114,7 @@ class WebinarApiTest extends TestCase
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('updateYTStream')->once()->andReturn(new YTLiveDtoMock());
-            $mock->shouldReceive('getYtLiveStream')->once()->andReturn(collect(['s']));
+            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect(['s']));
         });
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
