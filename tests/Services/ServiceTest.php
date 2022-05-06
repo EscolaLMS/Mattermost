@@ -5,6 +5,7 @@ namespace EscolaLms\Mattermost\Tests\Services;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Tests\TestCase;
+use EscolaLms\Webinar\Services\Contracts\WebinarServiceContract;
 use EscolaLms\Webinar\Tests\Mocks\YTLiveDtoMock;
 use EscolaLms\Youtube\Services\Contracts\YoutubeServiceContract;
 use GuzzleHttp\Psr7\Response;
@@ -24,23 +25,26 @@ class ServiceTest extends TestCase
         parent::setUp();
         $this->user = $this->makeStudent();
         $this->service = $this->app->make(MattermostServiceContract::class);
-        $this->mock->reset();
     }
 
     public function testAddUser()
     {
+        $this->mock->reset();
+        $this->mock->append(new Response(200, ['Token' => 'Token'], 'Hello, World'));
         if (class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
             $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
                 $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
-                $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect([1]));
+            });
+            $this->mock(WebinarServiceContract::class, function (MockInterface $mock) {
+                $mock->shouldReceive('hasYT')->zeroOrMoreTimes()->andReturn(true);
             });
         }
-        $this->mock->append(new Response(200, ['Token' => 'Token'], 'Hello, World'));
         $this->assertTrue($this->service->addUser($this->user));
     }
 
     public function testAddUserToTeam()
     {
+        $this->mock->reset();
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], ""));
@@ -50,6 +54,7 @@ class ServiceTest extends TestCase
 
     public function testAddUserToChannel()
     {
+        $this->mock->reset();
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
@@ -63,6 +68,7 @@ class ServiceTest extends TestCase
 
     public function testGetOrCreateTeam()
     {
+        $this->mock->reset();
         $response = new Response(200, ['Token' => 'Token'], json_encode(["id" => 123]));
         $this->mock->append($response);
 
@@ -71,6 +77,7 @@ class ServiceTest extends TestCase
 
     public function testGetOrCreateChannel()
     {
+        $this->mock->reset();
         $response = new Response(200, ['Token' => 'Token'], json_encode(["id" => 123]));
         $this->mock->append($response);
         $this->mock->append($response);
@@ -80,6 +87,7 @@ class ServiceTest extends TestCase
 
     public function testGetOrCreateUser()
     {
+        $this->mock->reset();
         $response = new Response(200, ['Token' => 'Token'], json_encode(["id" => 123]));
         $this->mock->append($response);
 
@@ -88,6 +96,7 @@ class ServiceTest extends TestCase
 
     public function testSendMessage()
     {
+        $this->mock->reset();
         $response = new Response(200, ['Token' => 'Token'], json_encode(["id" => 123]));
         $this->mock->append($response);
         $this->mock->append($response);
@@ -97,6 +106,7 @@ class ServiceTest extends TestCase
 
     public function testGenerateUserCredentials()
     {
+        $this->mock->reset();
         $object = ["id" => 123];
         $response = new Response(200, ['Token' => 'Token'], json_encode($object));
         $this->mock->append($response);
@@ -111,6 +121,7 @@ class ServiceTest extends TestCase
 
     public function testBlockUser()
     {
+        $this->mock->reset();
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
         $this->assertTrue($this->service->blockUser($this->user));
@@ -121,6 +132,7 @@ class ServiceTest extends TestCase
 
     public function testDeleteUser()
     {
+        $this->mock->reset();
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
         $this->assertTrue($this->service->deleteUser($this->user));
@@ -131,6 +143,7 @@ class ServiceTest extends TestCase
 
     public function testAddTutorToChanel(): void
     {
+        $this->mock->reset();
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
@@ -144,6 +157,7 @@ class ServiceTest extends TestCase
 
     public function testRemoveUserFromChannel(): void
     {
+        $this->mock->reset();
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["id" => 123])));
         $this->mock->append(new Response(200, ['Token' => 'Token'], json_encode(["status" => 'ok'])));
