@@ -55,7 +55,7 @@ class WebinarApiTest extends TestCase
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
         });
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {

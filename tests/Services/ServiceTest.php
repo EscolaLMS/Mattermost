@@ -10,6 +10,7 @@ use EscolaLms\Youtube\Services\Contracts\YoutubeServiceContract;
 use GuzzleHttp\Psr7\Response;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Mockery\MockInterface;
 
 class ServiceTest extends TestCase
 {
@@ -29,9 +30,12 @@ class ServiceTest extends TestCase
     public function testAddUser()
     {
         if (class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
-            $ytLiveDtoMock = new YTLiveDtoMock();
-            $youtubeServiceContract = $this->mock(YoutubeServiceContract::class);
-            $youtubeServiceContract->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect([1]));
+            $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+                $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect([1]));
+            });
+            $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+                $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
+            });
         }
         $this->mock->append(new Response(200, ['Token' => 'Token'], 'Hello, World'));
         $this->assertTrue($this->service->addUser($this->user));
