@@ -31,10 +31,8 @@ class ServiceTest extends TestCase
     {
         if (class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
             $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+                $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
                 $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect([1]));
-            });
-            $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-                $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
             });
         }
         $this->mock->append(new Response(200, ['Token' => 'Token'], 'Hello, World'));

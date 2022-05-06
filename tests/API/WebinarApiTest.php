@@ -55,14 +55,11 @@ class WebinarApiTest extends TestCase
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
-
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->never();
-        });
-        $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
             array_merge($webinar, ['trainers' => [$trainer->getKey()]])
@@ -77,14 +74,12 @@ class WebinarApiTest extends TestCase
         $trainer = $this->makeInstructor();
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
+            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
 
         $this->mock(MattermostServiceContract::class, function (MockInterface $mock) {
             $mock->shouldReceive('addUserToChannel')->once()->andReturn(true);
-        });
-        $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
-            $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
         $this->response = $this->actingAs($this->user, 'api')->postJson('/api/admin/webinars',
             array_merge($webinar, ['trainers' => [$trainer->getKey()]])
