@@ -5,6 +5,8 @@ namespace EscolaLms\Mattermost\Tests\Services;
 use EscolaLms\Core\Tests\CreatesUsers;
 use EscolaLms\Mattermost\Enum\MattermostRoleEnum;
 use EscolaLms\Mattermost\Tests\TestCase;
+use EscolaLms\Webinar\Tests\Mocks\YTLiveDtoMock;
+use EscolaLms\Youtube\Services\Contracts\YoutubeServiceContract;
 use GuzzleHttp\Psr7\Response;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -26,6 +28,11 @@ class ServiceTest extends TestCase
 
     public function testAddUser()
     {
+        if (class_exists(\EscolaLms\Webinar\EscolaLmsWebinarServiceProvider::class)) {
+            $ytLiveDtoMock = new YTLiveDtoMock();
+            $youtubeServiceContract = $this->mock(YoutubeServiceContract::class);
+            $youtubeServiceContract->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect([1]));
+        }
         $this->mock->append(new Response(200, ['Token' => 'Token'], 'Hello, World'));
         $this->assertTrue($this->service->addUser($this->user));
     }
