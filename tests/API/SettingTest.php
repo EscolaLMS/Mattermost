@@ -11,7 +11,7 @@ use EscolaLms\Settings\Database\Seeders\PermissionTableSeeder;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Config;
 
-class SettingsTest extends TestCase
+class SettingTest extends TestCase
 {
     use CreatesUsers, ApiTestTrait, WithoutMiddleware;
 
