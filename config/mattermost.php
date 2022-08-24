@@ -59,5 +59,5 @@ return [
 
     ],
 
-    'package_status' => PackageStatusEnum::ENABLED,
+    'package_status' => PackageStatusEnum::DISABLED,
 ];
