@@ -15,6 +15,7 @@
     "phpunit/phpunit": "^9.0",
     "orchestra/testbench": ">=5.0",
     "escolalms/courses": "^0",
+    "escolalms/course-access": "^0",
     "escolalms/webinar": "^0"
   },
   "license": "MIT",
