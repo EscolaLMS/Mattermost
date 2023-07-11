@@ -1,3 +1,10 @@
 # Admin panel documentation
 
-Coming soon documentation on this package
+This package can be configured in the Admin Panel. To do this, select the Settings and then navigate to the Mattermost tab.
+
+You need to enter access data to mattermost such as host, login and password. 
+
+You can change the `package_status` setting at any time. When disabled, the package will not listen to events.
+
+
+
