@@ -14,7 +14,8 @@ use EscolaLms\Mattermost\Services\MattermostService;
 
 class EscolaLmsMattermostServiceProvider extends ServiceProvider
 {
-    public $singletons = [
+    /** @var array<class-string, class-string> */
+    public array $singletons = [
         MattermostServiceContract::class => MattermostService::class,
     ];
 

@@ -3,6 +3,7 @@
 namespace EscolaLms\Mattermost\Http\Controllers;
 
 use EscolaLms\Core\Http\Controllers\EscolaLmsBaseController;
+use EscolaLms\Core\Models\User;
 use EscolaLms\Mattermost\Http\Controllers\Swagger\MattermostSwagger;
 use EscolaLms\Mattermost\Services\Contracts\MattermostServiceContract;
 use Illuminate\Http\JsonResponse;
@@ -20,16 +21,22 @@ class MattermostController extends EscolaLmsBaseController implements Mattermost
 
     public function me(Request $request): JsonResponse
     {
-        return $this->sendResponse($this->service->getUserData(Auth::user()));
+        /** @var User $user */
+        $user = Auth::user();
+        return $this->sendResponse($this->service->getUserData($user));
     }
 
     public function generateCredentials(Request $request): JsonResponse
     {
-        return $this->sendResponse($this->service->generateUserCredentials(Auth::user()));
+        /** @var User $user */
+        $user = Auth::user();
+        return $this->sendResponse($this->service->generateUserCredentials($user));
     }
 
     public function resetPassword(Request $request): JsonResponse
     {
-        return $this->sendResponse($this->service->sendUserResetPassword(Auth::user()));
+        /** @var User $user */
+        $user = Auth::user();
+        return $this->sendResponse($this->service->sendUserResetPassword($user));
     }
 }
