@@ -16,7 +16,8 @@
     "orchestra/testbench": ">=7.0",
     "escolalms/courses": "^0",
     "escolalms/course-access": "^0",
-    "escolalms/webinar": "^0"
+    "escolalms/webinar": "^0",
+    "nunomaduro/larastan": "^2.0"
   },
   "license": "MIT",
   "authors": [

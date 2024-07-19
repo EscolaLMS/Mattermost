@@ -10,9 +10,9 @@ interface MattermostServiceContract
 {
     public function addUser(User $user): bool;
 
-    public function addUserToTeam(User $user, $teamDisplayName = "Courses"): bool;
+    public function addUserToTeam(User $user, string $teamDisplayName = "Courses"): bool;
 
-    public function addUserToChannel(User $user, $channelDisplayName, $teamDisplayName = "Courses", $channelRole = MattermostRoleEnum::MEMBER): bool;
+    public function addUserToChannel(User $user, string $channelDisplayName, string $teamDisplayName = "Courses", string $channelRole = MattermostRoleEnum::MEMBER): bool;
 
     public function getOrCreateTeam(string $displayName): ResponseInterface;
 
@@ -20,17 +20,23 @@ interface MattermostServiceContract
 
     public function getOrCreateUser(User $user): ResponseInterface;
 
-    public function sendMessage(string $markdown, $channelDisplayName, $teamDisplayName = "Courses"): bool;
+    public function sendMessage(string $markdown, string $channelDisplayName, string $teamDisplayName = "Courses"): bool;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getUserData(User $user): array;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function generateUserCredentials(User $user): array;
 
-    public function sendUserResetPassword($user): bool;
+    public function sendUserResetPassword(User $user): bool;
 
     public function blockUser(User $user): bool;
 
     public function deleteUser(User $user): bool;
 
-    public function removeUserFromChannel(User $user, $channelDisplayName, $teamDisplayName = "Courses"): bool;
+    public function removeUserFromChannel(User $user, string $channelDisplayName, string $teamDisplayName = "Courses"): bool;
 }
