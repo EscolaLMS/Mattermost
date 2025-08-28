@@ -74,5 +74,11 @@
                 ]
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Mattermost",
+            "description": "Mattermost"
+        }
+    ]
 }
