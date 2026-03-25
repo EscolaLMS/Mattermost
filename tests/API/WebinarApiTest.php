@@ -28,6 +28,14 @@ class WebinarApiTest extends TestCase
             $this->markTestSkipped('Webinar package not installed');
         }
 
+        config([
+            'services.youtube.client_id' => 'test_client_id',
+            'services.youtube.client_secret' => 'test_secret',
+            'services.youtube.api_key' => 'test_api_key',
+            'services.youtube.refresh_token' => 'test_refresh_token',
+            'services.youtube.redirect_url' => 'redirect_url',
+        ]);
+
         $this->seed(WebinarsPermissionSeeder::class);
         Config::set('escola_settings.use_database', true);
         $this->user = config('auth.providers.users.model')::factory()->create();
@@ -55,6 +63,7 @@ class WebinarApiTest extends TestCase
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('isConfigured')->zeroOrMoreTimes()->andReturn(true);
             $mock->shouldReceive('generateYTStream')->once()->andReturn(new YTLiveDtoMock());
             $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
@@ -74,6 +83,7 @@ class WebinarApiTest extends TestCase
         $trainer = $this->makeInstructor();
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('isConfigured')->zeroOrMoreTimes()->andReturn(true);
             $mock->shouldReceive('generateYTStream')->zeroOrMoreTimes()->andReturn(new YTLiveDtoMock());
             $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect());
         });
@@ -98,6 +108,7 @@ class WebinarApiTest extends TestCase
         $this->setPackageStatus(PackageStatusEnum::DISABLED);
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('isConfigured')->zeroOrMoreTimes()->andReturn(true);
             $mock->shouldReceive('updateYTStream')->once()->andReturn(new YTLiveDtoMock());
             $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect(['s']));
         });
@@ -113,6 +124,7 @@ class WebinarApiTest extends TestCase
         $this->setPackageStatus(PackageStatusEnum::ENABLED);
 
         $this->mock(YoutubeServiceContract::class, function (MockInterface $mock) {
+            $mock->shouldReceive('isConfigured')->zeroOrMoreTimes()->andReturn(true);
             $mock->shouldReceive('updateYTStream')->once()->andReturn(new YTLiveDtoMock());
             $mock->shouldReceive('getYtLiveStream')->zeroOrMoreTimes()->andReturn(collect(['s']));
         });
